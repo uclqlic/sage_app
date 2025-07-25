@@ -140,16 +140,28 @@ if user_question:
     st.rerun()
 
 # ===== 回答逻辑 =====
-if len(st.session_state.chat_history) > 0 and "answer" in st.session_state.chat_history[-1] and st.session_state.chat_history[-1]["answer"] == "":
+if (
+    "chat_history" in st.session_state and
+    isinstance(st.session_state.chat_history, list) and
+    len(st.session_state.chat_history) > 0 and
+    isinstance(st.session_state.chat_history[-1], dict) and
+    "answer" in st.session_state.chat_history[-1] and
+    st.session_state.chat_history[-1]["answer"] == ""
+):
     with st.spinner("worth a cup of tea..."):
         try:
-            answer = st.session_state.agent.ask(st.session_state.chat_history[-1]["question"])
+            # 执行问答
+            question = st.session_state.chat_history[-1]["question"]
+            st.write("🧪 Debug: 当前问题为 →", question)
+
+            answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
             st.rerun()
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
-            st.session_state.chat_history.pop()
 
+        except Exception as e:
+            st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
+            st.session_state.chat_history[-1]["answer"] = f"⚠️ 无法生成回答：{e}"
+            st.rerun()
 # ===== 页脚 =====
 st.markdown("""
 <div style="text-align:center; margin-top:3rem; color:#888888;">
