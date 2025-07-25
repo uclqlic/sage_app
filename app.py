@@ -1,87 +1,156 @@
 import os
 import json
-import faiss
-import numpy as np
-from openai import OpenAI
-from dotenv import load_dotenv
-from embedding_model import LocalEmbeddingModel
+import base64
+import streamlit as st
+from rag_agent import RAGAgent
 
-# 加载角色 persona JSON 文件
+# ===== 页面配置 =====
+st.set_page_config(
+    page_title="Dao AI - Answer your question in Chinese Wisdom",
+    page_icon="🌮",
+    layout="centered",
+    initial_sidebar_state="expanded"  # 展开左侧栏
+)
+
+# ===== 加载 base64 图片 =====
+def image_to_base64(image_path):
+    try:
+        with open(image_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except FileNotFoundError:
+        return None
+
+# ===== 设置背景 =====
+def set_background(image_path):
+    bg_base64 = image_to_base64(image_path)
+    if bg_base64:
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url("data:image/png;base64,{bg_base64}");
+                background-size: cover;
+                background-attachment: fixed;
+                background-position: center;
+                background-repeat: no-repeat;
+            }}
+            .stApp::before {{
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.88);
+                z-index: -1;
+                pointer-events: none;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+# ===== 设置 Sidebar 背景 =====
+def set_sidebar_background(image_path):
+    bg_base64 = image_to_base64(image_path)
+    if bg_base64:
+        st.markdown(f"""
+        <style>
+        [data-testid="stSidebar"] {{
+            background-image: url("data:image/png;base64,{bg_base64}");
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+            backdrop-filter: blur(6px);
+            border-right: 1px solid rgba(0,0,0,0.05);
+            font-family: 'Inter', sans-serif;
+        }}
+        [data-testid="stSidebar"] > div:first-child {{
+            background: rgba(255,255,255,0.85);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;  /* 调整为稍小字体 */
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
+# ===== 现代字体和样式 =====
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+.stApp { font-family: 'Inter', sans-serif; }
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
+# ===== 背景图 =====
+set_background("水墨背景.png")
+set_sidebar_background("装饰云彩.png")
+
+# ===== 标题图标和文字 =====
+dao_icon_base64 = image_to_base64("道icon.png")
+if dao_icon_base64:
+    st.markdown(f"""
+    <div style="text-align:center; margin-bottom:2rem;">
+        <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:120px; border-radius:50%;">
+        <h1 style="font-size:3rem; font-weight:700;">Dao AI</h1>
+        <p style="font-size:1.2rem; color:#4a5568;">Chinese Wisdom · Enrich Your Mind & Soul</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ===== 加载人物 personas.json =====
+@st.cache_data(show_spinner=False)
 def load_personas():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    persona_path = os.path.join(current_dir, "personas.json")
-    if not os.path.exists(persona_path):
-        raise FileNotFoundError(f"无法找到 personas.json 文件：{persona_path}")
-    with open(persona_path, "r", encoding="utf-8") as f:
+    with open(os.path.join(current_dir, "personas.json"), "r", encoding="utf-8") as f:
         return json.load(f)
 
 personas = load_personas()
+mentor_names = list(personas.keys())
 
-# 加载 .env 文件中的 OPENAI_API_KEY
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# ===== 左侧栏：选择导师 =====
+with st.sidebar:
+    st.markdown("Choose Your Sage")
+    selected_mentor = st.selectbox("Sages", mentor_names)
+    ##st.markdown(f"Sage Discription: {personas[selected_mentor]['system_prompt']}", unsafe_allow_html=True)
 
-class RAGAgent:
-    def __init__(self, persona="孔子"):
-        self.embedder = LocalEmbeddingModel()
-        self.index = faiss.IndexFlatL2(self.embedder.dim)
-        self.documents = []  # list of (text, metadata)
-        self.persona = persona
-        self.history = []
+# ===== 初始化 Agent（切换清空聊天） =====
+if "selected_mentor" not in st.session_state or st.session_state.selected_mentor != selected_mentor:
+    st.session_state.selected_mentor = selected_mentor
+    st.session_state.agent = RAGAgent(persona=selected_mentor)
+    st.session_state.chat_history = []
 
-    def add_documents(self, docs):
-        # docs: list of (text, metadata)
-        embeddings = [self.embedder.embed_text(text) for text, _ in docs]
-        self.index.add(np.array(embeddings, dtype="float32"))
-        self.documents.extend(docs)
+# ===== 显示聊天历史 =====
+for msg in st.session_state.chat_history:
+    with st.chat_message("user"):
+        st.markdown(msg["question"])
+    with st.chat_message("assistant", avatar="🌮"):
+        st.markdown(msg["answer"])
 
-    def retrieve(self, query, top_k=5):
-        embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
-        _, indices = self.index.search(embedding, top_k)
-        return [self.documents[i] for i in indices[0] if i < len(self.documents)]
+# ===== 输入问题 =====
+user_question = st.chat_input("Ask anything...")
 
-    def ask(self, question):
-        context_pairs = self.retrieve(question)
+if user_question:
+    st.session_state.chat_history.append({"question": user_question, "answer": ""})
+    st.rerun()
 
-        # 获取角色人格
-        persona_data = personas.get(self.persona)
-        if not persona_data:
-            raise ValueError(f"角色 {self.persona} 不存在")
+# ===== 回答逻辑 =====
+if st.session_state.chat_history and st.session_state.chat_history[-1]["answer"] == "":
+    with st.spinner("worth a cup of tea..."):
+        try:
+            answer = st.session_state.agent.ask(st.session_state.chat_history[-1]["question"])
+            st.session_state.chat_history[-1]["answer"] = answer
+            st.rerun()
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
+            st.session_state.chat_history.pop()
 
-        system_prompt = persona_data["system_prompt"]
-
-        # 构造引用段落
-        quote_blocks = ""
-        for text, meta in context_pairs:
-            book = meta.get("title", "未知书籍").replace(".md", "").replace(".pdf", "")
-            chapter = meta.get("chapter_title", "未知章节")
-            quote_blocks += f"> {text.strip()}\n> ——《{book}》·{chapter}\n\n"
-
-        user_prompt = f"""
-【引用资料】：
-{quote_blocks}
-
-【用户问题】：{question}
-请以你的风格回答，引用资料内容，不得编造。
-"""
-
-        messages = [{"role": "system", "content": system_prompt}]
-        for q, a in self.history[-5:]:
-            messages.append({"role": "user", "content": q})
-            messages.append({"role": "assistant", "content": a})
-        messages.append({"role": "user", "content": user_prompt})
-
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=messages,
-            temperature=0.7
-        )
-
-        answer = response.choices[0].message.content.strip()
-        self.history.append((question, answer))
-        return answer
-
-if __name__ == "__main__":
-    from rich import print
-    import streamlit as st
-    print("[bold green]RAGAgent ready for use in app.py[/bold green]")
+# ===== 页脚 =====
+st.markdown("""
+<div style="text-align:center; margin-top:3rem; color:#888888;">
+    <p>道可道，非常道 · 名可名，非常名</p>
+</div>
+""", unsafe_allow_html=True)
