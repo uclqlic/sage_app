@@ -1,23 +1,12 @@
 import os
 import json
-import chromadb
-import streamlit as st
+import faiss
+import numpy as np
 from openai import OpenAI
 from dotenv import load_dotenv
 from embedding_model import LocalEmbeddingModel
 
-st.set_page_config(
-    page_title="Dao AI - Answer your question in Chinese Wisdom",
-    page_icon="🏮",
-    layout="centered",
-    initial_sidebar_state="expanded"   # ✅ 改成 expanded
-)
-
-# 加载 .env 文件中的 OPENAI_API_KEY
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# 加载角色 persona JSON 文件（动态路径）
+# 加载角色 persona JSON 文件
 def load_personas():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     persona_path = os.path.join(current_dir, "personas.json")
@@ -26,38 +15,40 @@ def load_personas():
     with open(persona_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+personas = load_personas()
+
+# 加载 .env 文件中的 OPENAI_API_KEY
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 class RAGAgent:
-    def __init__(self, persona=None, persist_dir="chroma_store"):
+    def __init__(self, persona="孔子"):
         self.embedder = LocalEmbeddingModel()
-        self.client = chromadb.PersistentClient(path=persist_dir)
-        self.collection = self.client.get_or_create_collection(name="dao_knowledge")
+        self.index = faiss.IndexFlatL2(self.embedder.dim)
+        self.documents = []  # list of (text, metadata)
+        self.persona = persona
         self.history = []
 
-        # 加载或指定人物 persona
-        self.personas = load_personas()
-        if persona is None:
-            self.persona = self.personas.get("孔子")
-        elif isinstance(persona, dict):
-            self.persona = persona
-        elif isinstance(persona, str):
-            self.persona = self.personas.get(persona)
-        else:
-            raise ValueError("Invalid persona input")
-
-        if not self.persona:
-            raise ValueError("角色 persona 加载失败")
+    def add_documents(self, docs):
+        # docs: list of (text, metadata)
+        embeddings = [self.embedder.embed_text(text) for text, _ in docs]
+        self.index.add(np.array(embeddings, dtype="float32"))
+        self.documents.extend(docs)
 
     def retrieve(self, query, top_k=5):
-        embedding = self.embedder.embed_text(query)
-        results = self.collection.query(
-            query_embeddings=[embedding],
-            n_results=top_k
-        )
-        return list(zip(results["documents"][0], results["metadatas"][0]))
+        embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
+        _, indices = self.index.search(embedding, top_k)
+        return [self.documents[i] for i in indices[0] if i < len(self.documents)]
 
     def ask(self, question):
         context_pairs = self.retrieve(question)
-        system_prompt = self.persona["system_prompt"]
+
+        # 获取角色人格
+        persona_data = personas.get(self.persona)
+        if not persona_data:
+            raise ValueError(f"角色 {self.persona} 不存在")
+
+        system_prompt = persona_data["system_prompt"]
 
         # 构造引用段落
         quote_blocks = ""
@@ -66,7 +57,6 @@ class RAGAgent:
             chapter = meta.get("chapter_title", "未知章节")
             quote_blocks += f"> {text.strip()}\n> ——《{book}》·{chapter}\n\n"
 
-        # 构造用户 prompt
         user_prompt = f"""
 【引用资料】：
 {quote_blocks}
@@ -92,12 +82,13 @@ class RAGAgent:
         return answer
 
 if __name__ == "__main__":
-    personas = load_personas()
-    persona_id = st.selectbox("请选择导师：", list(personas.keys()), index=0)
-    agent = RAGAgent(persona=persona_id)
+    agent = RAGAgent()
     while True:
         question = input("\n🤖 请输入你的问题（输入 q 退出）：\n> ")
         if question.lower() in ['q', 'quit', 'exit']:
             break
+        role_id = input("请选择角色（孔子 / 老子 / 南怀瑾）：\n> ") or "孔子"
+        agent.persona = role_id
         answer = agent.ask(question)
-        print(f"\n💡 回答（{persona_id}）：\n{answer}")
+        print(f"\n💡 回答（{role_id}）：\n{answer}")
+
