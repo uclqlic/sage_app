@@ -3,3 +3,6 @@ openai
 chromadb>=0.4.22
 python-dotenv
 tiktoken
+langchain
+faiss-cpu
+pymupdf
