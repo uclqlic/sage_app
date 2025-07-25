@@ -6,7 +6,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from embedding_model import LocalEmbeddingModel
 
-# 加载角色 persona JSON 文件
+# 加载人物设定
 def load_personas():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     persona_path = os.path.join(current_dir, "personas.json")
@@ -17,26 +17,29 @@ def load_personas():
 
 personas = load_personas()
 
-# 加载 .env 文件中的 OPENAI_API_KEY
+# 加载 .env 中的 OpenAI Key
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class RAGAgent:
-    def add_documents(self, docs):
-        # docs: list of (text, metadata)
-        embeddings = [self.embedder.embed_text(text) for text, _ in docs]
-        self.index.add(np.array(embeddings, dtype="float32"))
-        self.documents.extend(docs)
     def __init__(self, persona="孔子"):
         self.embedder = LocalEmbeddingModel()
         self.index = faiss.IndexFlatL2(self.embedder.dim)
-        self.documents = []  # list of (text, metadata)
+        self.documents = []  # [(text, metadata)]
         self.persona = persona
         self.history = []
+
+        # ✅ 添加默认文档，避免空 index 报错
         self.add_documents([
             ("道可道，非常道；名可名，非常名。", {"title": "道德经", "chapter_title": "第一章"}),
             ("学而时习之，不亦说乎？", {"title": "论语", "chapter_title": "学而篇"})
         ])
+
+    def add_documents(self, docs):
+        embeddings = [self.embedder.embed_text(text) for text, _ in docs]
+        self.index.add(np.array(embeddings, dtype="float32"))
+        self.documents.extend(docs)
+
     def retrieve(self, query, top_k=5):
         if self.index.ntotal == 0:
             return []
@@ -44,18 +47,16 @@ class RAGAgent:
         _, indices = self.index.search(embedding, top_k)
         return [self.documents[i] for i in indices[0] if i < len(self.documents)]
 
-
     def ask(self, question):
         context_pairs = self.retrieve(question)
 
-        # 获取角色人格
         persona_data = personas.get(self.persona)
         if not persona_data:
             raise ValueError(f"角色 {self.persona} 不存在")
 
         system_prompt = persona_data["system_prompt"]
 
-        # 构造引用段落
+        # 构造引用段
         quote_blocks = ""
         for text, meta in context_pairs:
             book = meta.get("title", "未知书籍").replace(".md", "").replace(".pdf", "")
@@ -86,6 +87,7 @@ class RAGAgent:
         self.history.append((question, answer))
         return answer
 
+# ✅ CLI 测试入口（可选）
 if __name__ == "__main__":
     agent = RAGAgent()
     while True:
@@ -96,4 +98,3 @@ if __name__ == "__main__":
         agent.persona = role_id
         answer = agent.ask(question)
         print(f"\n💡 回答（{role_id}）：\n{answer}")
-
