@@ -4,3 +4,7 @@ streamlit
 tiktoken
 python-dotenv
 faiss-cpu
+transformers
+torch
+sentencepiece
+huggingface-hub
