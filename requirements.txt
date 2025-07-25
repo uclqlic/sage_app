@@ -1,10 +1,7 @@
-chromadb
-openai
 streamlit
-tiktoken
+openai
 python-dotenv
 faiss-cpu
 transformers
 torch
 sentencepiece
-huggingface-hub
