@@ -1,7 +1,8 @@
 streamlit
 openai
-python-dotenv
 faiss-cpu
 transformers
-torch
-sentencepiece
+sentence-transformers
+python-dotenv
+torch==2.0.1+cpu
+--find-links https://download.pytorch.org/whl/torch_stable.html
