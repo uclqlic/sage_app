@@ -1,12 +1,17 @@
-from sentence_transformers import SentenceTransformer
+import os
+import openai
+from dotenv import load_dotenv
+import numpy as np
+
+load_dotenv()
 
 class LocalEmbeddingModel:
     def __init__(self):
-        self.model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+        openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    @property
-    def dim(self):
-        return self.model.get_sentence_embedding_dimension()
-
-    def embed_text(self, text):
-        return self.model.encode(text, normalize_embeddings=True)
+    def embed(self, text):
+        response = openai.embeddings.create(
+            input=text,
+            model="text-embedding-3-small"  # 更轻量的新模型
+        )
+        return np.array(response.data[0].embedding)
