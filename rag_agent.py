@@ -38,9 +38,12 @@ class RAGAgent:
             ("学而时习之，不亦说乎？", {"title": "论语", "chapter_title": "学而篇"})
         ])
     def retrieve(self, query, top_k=5):
+        if self.index.ntotal == 0:
+            return []
         embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
         _, indices = self.index.search(embedding, top_k)
         return [self.documents[i] for i in indices[0] if i < len(self.documents)]
+
 
     def ask(self, question):
         context_pairs = self.retrieve(question)
