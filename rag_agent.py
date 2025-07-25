@@ -22,19 +22,21 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class RAGAgent:
+    def add_documents(self, docs):
+        # docs: list of (text, metadata)
+        embeddings = [self.embedder.embed_text(text) for text, _ in docs]
+        self.index.add(np.array(embeddings, dtype="float32"))
+        self.documents.extend(docs)
     def __init__(self, persona="孔子"):
         self.embedder = LocalEmbeddingModel()
         self.index = faiss.IndexFlatL2(self.embedder.dim)
         self.documents = []  # list of (text, metadata)
         self.persona = persona
         self.history = []
-
-    def add_documents(self, docs):
-        # docs: list of (text, metadata)
-        embeddings = [self.embedder.embed_text(text) for text, _ in docs]
-        self.index.add(np.array(embeddings, dtype="float32"))
-        self.documents.extend(docs)
-
+        self.add_documents([
+            ("道可道，非常道；名可名，非常名。", {"title": "道德经", "chapter_title": "第一章"}),
+            ("学而时习之，不亦说乎？", {"title": "论语", "chapter_title": "学而篇"})
+        ])
     def retrieve(self, query, top_k=5):
         embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
         _, indices = self.index.search(embedding, top_k)
