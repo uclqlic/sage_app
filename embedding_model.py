@@ -1,16 +1,12 @@
-# embedding_model.py
-from transformers import AutoTokenizer, AutoModel
-import torch
+from sentence_transformers import SentenceTransformer
 
 class LocalEmbeddingModel:
-    def __init__(self, model_name="BAAI/bge-small-zh"):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModel.from_pretrained(model_name)
-        self.model.eval()
+    def __init__(self):
+        self.model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
-    def embed_text(self, text: str) -> list:
-        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True)
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-            embeddings = outputs.last_hidden_state.mean(dim=1)
-        return embeddings[0].numpy().tolist()
+    @property
+    def dim(self):
+        return self.model.get_sentence_embedding_dimension()
+
+    def embed_text(self, text):
+        return self.model.encode(text, normalize_embeddings=True)
