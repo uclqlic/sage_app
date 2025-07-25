@@ -118,10 +118,12 @@ with st.sidebar:
     ##st.markdown(f"Sage Discription: {personas[selected_mentor]['system_prompt']}", unsafe_allow_html=True)
 
 # ===== 初始化 Agent（切换清空聊天） =====
-if "selected_mentor" not in st.session_state or st.session_state.selected_mentor != selected_mentor:
-    st.session_state.selected_mentor = selected_mentor
-    st.session_state.agent = RAGAgent(persona=selected_mentor)
+if "selected_mentor" not in st.session_state:
+    st.session_state.selected_mentor = mentor_names[0]
+if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "agent" not in st.session_state:
+    st.session_state.agent = RAGAgent(persona=st.session_state.selected_mentor)
 
 # ===== 显示聊天历史 =====
 for msg in st.session_state.chat_history:
