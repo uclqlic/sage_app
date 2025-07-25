@@ -140,7 +140,7 @@ if user_question:
     st.rerun()
 
 # ===== 回答逻辑 =====
-if st.session_state.chat_history and st.session_state.chat_history[-1]["answer"] == "":
+if len(st.session_state.chat_history) > 0 and "answer" in st.session_state.chat_history[-1] and st.session_state.chat_history[-1]["answer"] == "":
     with st.spinner("worth a cup of tea..."):
         try:
             answer = st.session_state.agent.ask(st.session_state.chat_history[-1]["question"])
