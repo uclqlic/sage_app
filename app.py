@@ -152,7 +152,7 @@ if (
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
-            st.write("🧪 Debug: 当前问题为 →", question)
+            st.write("Sage is thinking", question)
 
             answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
@@ -160,7 +160,7 @@ if (
 
         except Exception as e:
             st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"⚠️ 无法生成回答：{e}"
+            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating：{e}"
             st.rerun()
 # ===== 页脚 =====
 st.markdown("""
