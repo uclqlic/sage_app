@@ -1,8 +1,7 @@
-streamlit>=1.0
-openai>=0.27.0
-transformers>=4.20.0
-sentence-transformers>=2.2.0
-python-dotenv>=0.19.2
-torch==2.6.0
-pymilvus==2.0.0  # Milvus Python 客户端
-numpy==1.23.5
+streamlit
+openai
+faiss-cpu
+transformers
+sentence-transformers
+python-dotenv
+torch==2.6
