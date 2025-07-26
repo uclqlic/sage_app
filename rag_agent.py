@@ -17,10 +17,14 @@ def load_personas():
 
 personas = load_personas()
 
-# 获取 OpenAI API Key 从 Streamlit Secrets
-api_key = st.secrets.get("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("未在 Streamlit Secrets 中找到 OPENAI_API_KEY")
+# 从 Streamlit Secrets 中获取 OpenAI API Key
+try:
+    api_key = st.secrets["OPENAI_API_KEY"]  # 直接通过字典方式访问
+    if not api_key:
+        raise ValueError("未找到有效的 OPENAI_API_KEY")
+    st.write(f"API Key 成功加载：{api_key[:5]}...")  # 输出部分 API Key 进行调试
+except KeyError:
+    raise ValueError("在 Streamlit Secrets 中未找到 OPENAI_API_KEY")
 
 client = OpenAI(api_key=api_key)
 
