@@ -48,11 +48,17 @@ class RAGAgent:
         self.index.add(embeddings)  # 将文档嵌入添加到 FAISS 索引中
         self.documents.extend(docs)  # 添加文档元数据
 
-    def retrieve(self, query, top_k=5):
-        embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
-        _, indices = self.index.search(embedding, top_k)
-        # 如果返回的索引超出了文档范围，避免引发 index out of range 错误
-        valid_indices = [i for i in indices[0] if i < len(self.documents)]
+   def retrieve(self, query, top_k=5):
+    # 将查询文本转换为嵌入
+    embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
+
+    # 执行 FAISS 查询，获取最近的 top_k 个索引
+    _, indices = self.index.search(embedding, top_k)
+
+    # 如果返回的索引超出了文档范围，过滤掉无效索引
+    valid_indices = [i for i in indices[0] if i < len(self.documents)]
+
+    # 返回有效的文档
     return [self.documents[i] for i in valid_indices]
 
     def ask(self, question):
