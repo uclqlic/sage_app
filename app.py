@@ -8,8 +8,8 @@ from rag_agent import RAGAgent
 st.set_page_config(
     page_title="Dao AI - Answer your question in Chinese Wisdom",
     page_icon="🌮",
-    layout="centered",
-    initial_sidebar_state="expanded"  # 展开左侧栏
+    layout="wide",  # Use full width layout for better visual appeal
+    initial_sidebar_state="collapsed"  # Sidebar starts collapsed for a cleaner interface
 )
 
 # ===== 加载 base64 图片 =====
@@ -30,7 +30,6 @@ def set_background(image_path):
             .stApp {{
                 background-image: url("data:image/png;base64,{bg_base64}");
                 background-size: cover;
-                background-attachment: fixed;
                 background-position: center;
                 background-repeat: no-repeat;
             }}
@@ -113,13 +112,12 @@ mentor_names = list(personas.keys())
 
 # ===== 左侧栏：选择导师 =====
 with st.sidebar:
-    st.markdown("Choose Your Sage")
-    selected_mentor = st.selectbox("Sages", mentor_names)
-    ##st.markdown(f"Sage Discription: {personas[selected_mentor]['system_prompt']}", unsafe_allow_html=True)
+    st.markdown("**Choose Your Sage**")
+    selected_mentor = st.selectbox("Select Sage", mentor_names, index=0)
 
 # ===== 初始化 Agent（切换清空聊天） =====
 if "selected_mentor" not in st.session_state:
-    st.session_state.selected_mentor = mentor_names[0]
+    st.session_state.selected_mentor = selected_mentor
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "agent" not in st.session_state:
@@ -148,11 +146,11 @@ if (
     "answer" in st.session_state.chat_history[-1] and
     st.session_state.chat_history[-1]["answer"] == ""
 ):
-    with st.spinner("worth a cup of tea..."):
+    with st.spinner("Thinking..."):
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
-            st.write("Sage is thinking", question)
+            st.write("Sage is contemplating...", question)
 
             answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
@@ -160,8 +158,9 @@ if (
 
         except Exception as e:
             st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating：{e}"
+            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating: {e}"
             st.rerun()
+
 # ===== 页脚 =====
 st.markdown("""
 <div style="text-align:center; margin-top:3rem; color:#888888;">
