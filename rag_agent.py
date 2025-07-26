@@ -1,10 +1,9 @@
-import os
 import json
 import faiss
 import numpy as np
+import streamlit as st
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
-from dotenv import load_dotenv
 
 # 加载人物 personas.json 文件
 def load_personas():
@@ -25,9 +24,8 @@ class RAGAgent:
         self.documents = []
         self.history = []
 
-        # 加载 OpenAI API 密钥
-        load_dotenv()
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        # 使用 Streamlit Secrets 获取 OpenAI API 密钥
+        self.openai_client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
         # 加载 persona
         self.personas = load_personas()
