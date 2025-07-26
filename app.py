@@ -113,11 +113,15 @@ mentor_names = list(personas.keys())
 # ===== 左侧栏：选择导师 =====
 with st.sidebar:
     st.markdown("**Choose Your Sage**")
-    selected_mentor = st.selectbox("Select Sage", mentor_names, index=0)
+    selected_mentor = st.selectbox("Select Sage", mentor_names, index=mentor_names.index(st.session_state.selected_mentor) if "selected_mentor" in st.session_state else 0)
+
+# ===== 如果选定的导师发生变化，则重新创建 RAGAgent 实例 =====
+if selected_mentor != st.session_state.get("selected_mentor", ""):
+    st.session_state.selected_mentor = selected_mentor
+    st.session_state.agent = RAGAgent(persona=selected_mentor)
+    st.session_state.chat_history = []  # 清空聊天历史
 
 # ===== 初始化 Agent（切换清空聊天） =====
-if "selected_mentor" not in st.session_state:
-    st.session_state.selected_mentor = selected_mentor
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "agent" not in st.session_state:
@@ -150,20 +154,5 @@ if (
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
-            st.write("Sage is contemplating...", question)
+            st.write("Sage is con
 
-            answer = st.session_state.agent.ask(question)
-            st.session_state.chat_history[-1]["answer"] = answer
-            st.rerun()
-
-        except Exception as e:
-            st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating: {e}"
-            st.rerun()
-
-# ===== 页脚 =====
-st.markdown("""
-<div style="text-align:center; margin-top:3rem; color:#888888;">
-    <p>道可道，非常道 · 名可名，非常名</p>
-</div>
-""", unsafe_allow_html=True)
