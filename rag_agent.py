@@ -1,6 +1,6 @@
 import os
 import json
-import chromadb
+import faiss
 import streamlit as st
 from openai import OpenAI
 from embedding_model import LocalEmbeddingModel
@@ -16,17 +16,18 @@ def load_personas():
 
 # ===== 核心 Agent 类 =====
 class RAGAgent:
-    def __init__(self, persona=None, persist_dir="chroma_store"):
-        # 初始化本地向量检索
+    def __init__(self, persona=None, persist_dir="faiss_index"):
+        # 初始化嵌入模型
         self.embedder = LocalEmbeddingModel()
-        self.vector_client = chromadb.PersistentClient(path=persist_dir)
-        self.collection = self.vector_client.get_or_create_collection(name="dao_knowledge")
-        self.history = []
+
+        # 初始化 FAISS 向量索引
+        self.index = faiss.IndexFlatL2(self.embedder.dim)  # L2 距离度量
+        self.documents = []  # 存储文档
 
         # 使用 Streamlit Secrets 获取 OpenAI API 密钥
         self.openai_client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-        # 加载导师 persona
+        # 加载 persona
         self.personas = load_personas()
         if persona is None:
             self.persona = self.personas.get("孔子")
@@ -40,19 +41,17 @@ class RAGAgent:
         if not self.persona:
             raise ValueError("角色 persona 加载失败")
 
+    def add_documents(self, docs):
+        # docs: list of (text, metadata)
+        embeddings = [self.embedder.embed_text(text) for text, _ in docs]
+        embeddings = np.array(embeddings, dtype="float32")
+        self.index.add(embeddings)  # 将文档嵌入添加到 FAISS 索引中
+        self.documents.extend(docs)  # 添加文档元数据
+
     def retrieve(self, query, top_k=5):
-        embedding = self.embedder.embed_text(query)
-        results = self.collection.query(
-            query_embeddings=[embedding],
-            n_results=top_k
-        )
-
-        # 检查结果是否为空，避免访问空的列表
-        if len(results["documents"][0]) == 0:  # 如果没有返回的文档
-            return []  # 返回空列表，表示没有找到相关文档
-
-        # 返回查询结果
-        return list(zip(results["documents"][0], results["metadatas"][0]))
+        embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
+        _, indices = self.index.search(embedding, top_k)
+        return [self.documents[i] for i in indices[0] if i < len(self.documents)]
 
     def ask(self, question):
         context_pairs = self.retrieve(question)
@@ -103,4 +102,3 @@ if __name__ == "__main__":
         answer = agent.ask(question)
         print(f"\n💡 回答（{persona_id}）：\n{answer}")
 
-print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])
