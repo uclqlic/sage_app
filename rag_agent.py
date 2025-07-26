@@ -56,17 +56,24 @@ class RAGAgent:
         """
         # 将查询文本转换为嵌入
         embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
-
+    
         # 执行 FAISS 查询，获取最近的 top_k 个索引
         _, indices = self.index.search(embedding, top_k)
-
-        # 返回根据查询索引获取到的文档，处理索引越界的情况
+    
+        # 检查索引越界并返回有效的文档
         result_documents = []
         for i in indices[0]:
             if i < len(self.documents):  # 确保索引不超出文档范围
                 result_documents.append(self.documents[i])
-        
-        return result_documents
+            else:
+                print(f"警告：索引 {i} 超出了文档列表的范围。")
+    
+        # 如果没有返回任何文档，提示并返回空列表
+        if len(result_documents) == 0:
+            st.warning("没有找到相关文档")
+            return []
+    return result_documents
+
 
     def ask(self, question):
         """
