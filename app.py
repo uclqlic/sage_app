@@ -89,6 +89,17 @@ footer {visibility: hidden;}
 set_background("水墨背景.png")
 set_sidebar_background("装饰云彩.png")
 
+# ===== 标题图标和文字 =====
+dao_icon_base64 = image_to_base64("道icon.png")
+if dao_icon_base64:
+    st.markdown(f"""
+    <div style="text-align:center; margin-bottom:2rem;">
+        <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:120px; border-radius:50%;">
+        <h1 style="font-size:3rem; font-weight:700;">Dao AI</h1>
+        <p style="font-size:1.2rem; color:#4a5568;">Chinese Wisdom · Enrich Your Mind & Soul</p>
+    </div>
+    """, unsafe_allow_html=True)
+
 # ===== 加载人物 personas.json =====
 @st.cache_data(show_spinner=False)
 def load_personas():
@@ -104,29 +115,19 @@ with st.sidebar:
     st.markdown("**Choose Your Sage**")
     selected_mentor = st.selectbox("Select Sage", mentor_names, index=0)
 
-# ===== 设置头像路径 =====
-def get_avatar(mentor_name):
-    avatars = {
-        "Laozi": "images/laozi_icon.png",  # Example image for Laozi
-        "Zhuangzi": "images/zhuangzi_icon.png",  # Example image for Zhuangzi
-        # Add more mentors and their avatars here
-    }
-    return avatars.get(mentor_name, "images/default_avatar.png")
-
-# ===== 更新 persona 和初始化 Agent（切换清空聊天） =====
-if "selected_mentor" not in st.session_state or st.session_state.selected_mentor != selected_mentor:
-    # 清空聊天历史和重新设置persona
+# ===== 初始化 Agent（切换清空聊天） =====
+if "selected_mentor" not in st.session_state:
     st.session_state.selected_mentor = selected_mentor
-    st.session_state.chat_history = []  # Clear the chat history on mentor change
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+if "agent" not in st.session_state:
     st.session_state.agent = RAGAgent(persona=st.session_state.selected_mentor)
 
 # ===== 显示聊天历史 =====
-mentor_avatar = get_avatar(st.session_state.selected_mentor)
-
 for msg in st.session_state.chat_history:
-    with st.chat_message("user", avatar="images/user_avatar.png"):  # Assuming user uploads or has a default avatar
+    with st.chat_message("user"):
         st.markdown(msg["question"])
-    with st.chat_message("assistant", avatar=mentor_avatar):
+    with st.chat_message("assistant", avatar="🌮"):
         st.markdown(msg["answer"])
 
 # ===== 输入问题 =====
