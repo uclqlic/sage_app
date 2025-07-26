@@ -1,9 +1,9 @@
 import os
 import json
 import streamlit as st
+from pymilvus import Collection, CollectionSchema, FieldSchema, DataType
 from openai import OpenAI
 from embedding_model import LocalEmbeddingModel
-import chromadb
 
 # 加载人物 personas.json 文件
 def load_personas():
@@ -15,20 +15,19 @@ def load_personas():
         return json.load(f)
 
 class RAGAgent:
-    def __init__(self, persona=None, persist_dir="chromadb_index"):
-        # 初始化 LocalEmbeddingModel 用于文本嵌入
+    def __init__(self, persona=None, persist_dir="milvus_index"):
+        # 初始化 OpenAI 客户端
         self.embedder = LocalEmbeddingModel()
-
-        # 使用 chromadb 初始化向量数据库
-        self.client = chromadb.Client()
-        self.collection = self.client.create_collection(name="dao_knowledge")  # 创建或获取数据库集合
-        self.documents = []  # [(text, metadata)] 用于存储文档
-        self.persona = persona
-        self.history = []
-
-        # 使用 Streamlit Secrets 获取 OpenAI API 密钥
         self.openai_client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
+        # 初始化 Milvus 客户端
+        self.client = Milvus("tcp://localhost:19530")
+        schema = CollectionSchema([
+            FieldSchema(name="text", dtype=DataType.STRING),
+            FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=self.embedder.dim)
+        ], "text")
+        self.collection = self.client.create_collection("documents", schema)
+        
         # 加载 persona
         self.personas = load_personas()
         if persona is None:
@@ -42,46 +41,32 @@ class RAGAgent:
 
         if not self.persona:
             raise ValueError("角色 persona 加载失败")
+        
+        self.history = []
 
     def add_documents(self, docs):
         """
-        添加文档到 chromadb 数据库。
+        添加文档到 Milvus 索引。
         docs: [(text, metadata)]
         """
-        # 获取文档的嵌入表示
         embeddings = [self.embedder.embed_text(text) for text, _ in docs]
-        
-        # 使用 chromadb 存储嵌入和文档
-        for doc, embedding in zip(docs, embeddings):
-            self.collection.add(
-                documents=[doc[0]],  # 文本
-                metadatas=[doc[1]],   # 元数据
-                embeddings=[embedding]  # 嵌入
-            )
-        self.documents.extend(docs)
+        self.collection.insert([docs, embeddings])
 
     def retrieve(self, query, top_k=5):
         """
-        根据查询文本从 chromadb 中检索相关文档。
+        根据查询文本从 Milvus 索引中检索相关文档。
         """
-        # 将查询文本转换为嵌入
-        embedding = self.embedder.embed_text(query)
-        
-        # 使用 chromadb 查询相关的 top_k 个文档
-        results = self.collection.query(
-            query_embeddings=[embedding],
-            n_results=top_k
-        )
-        
-        # 检查结果并返回有效文档
+        embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
+    
+        # 执行 Milvus 查询，获取最近的 top_k 个索引
+        search_params = {"nprobe": 10}
+        results = self.collection.search([embedding], "vector", search_params, limit=top_k)
+    
+        # 返回检索到的文档
         result_documents = []
-        for text, meta in zip(results["documents"][0], results["metadatas"][0]):
-            result_documents.append((text, meta))
-        
-        if len(result_documents) == 0:
-            st.warning("没有找到相关文档")
-            return []
-
+        for result in results[0]:
+            result_documents.append(result.id)  # 返回文档 ID 和内容
+    
         return result_documents
 
     def ask(self, question):
@@ -93,10 +78,8 @@ class RAGAgent:
 
         # 构造引用段落
         quote_blocks = ""
-        for text, meta in context_pairs:
-            book = meta.get("title", "未知书籍").replace(".md", "").replace(".pdf", "")
-            chapter = meta.get("chapter_title", "未知章节")
-            quote_blocks += f"> {text.strip()}\n> ——《{book}》·{chapter}\n\n"
+        for doc in context_pairs:
+            quote_blocks += f"> {doc.strip()}\n"
 
         # 构造用户 prompt
         user_prompt = f"""
@@ -124,17 +107,3 @@ class RAGAgent:
         answer = response.choices[0].message.content.strip()
         self.history.append((question, answer))
         return answer
-
-# ===== 命令行测试入口（非 streamlit 时使用） =====
-if __name__ == "__main__":
-    personas = load_personas()
-    persona_id = "孔子"
-    agent = RAGAgent(persona=persona_id)
-    while True:
-        question = input("\n🤖 请输入你的问题（输入 q 退出）：\n> ")
-        if question.lower() in ['q', 'quit', 'exit']:
-            break
-        answer = agent.ask(question)
-        print(f"\n💡 回答（{persona_id}）：\n{answer}")
-
-print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])
