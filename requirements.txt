@@ -4,6 +4,4 @@ faiss-cpu
 transformers
 sentence-transformers
 python-dotenv
-
-# ✅ 用 PyTorch 官方发布的兼容版本，不指定 +cpu
-torch==2.5.1
+torch==2.6
