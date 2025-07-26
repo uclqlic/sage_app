@@ -1,11 +1,11 @@
 import os
 import json
 import faiss
-import streamlit as st
+import numpy as np
 from openai import OpenAI
 from embedding_model import LocalEmbeddingModel
 
-# ===== 加载人物 personas.json 文件 =====
+# 加载人物 personas.json 文件
 def load_personas():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     persona_path = os.path.join(current_dir, "personas.json")
@@ -14,18 +14,17 @@ def load_personas():
     with open(persona_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-# ===== 核心 Agent 类 =====
 class RAGAgent:
     def __init__(self, persona=None, persist_dir="faiss_index"):
-        # 初始化嵌入模型
+        # 初始化本地向量检索
         self.embedder = LocalEmbeddingModel()
+        self.index = faiss.IndexFlatL2(self.embedder.dim)
+        self.documents = []  # [(text, metadata)] 用于存储文档
+        self.persona = persona
+        self.history = []
 
-        # 初始化 FAISS 向量索引
-        self.index = faiss.IndexFlatL2(self.embedder.dim)  # L2 距离度量
-        self.documents = []  # 存储文档
-
-        # 使用 Streamlit Secrets 获取 OpenAI API 密钥
-        self.openai_client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+        # 初始化 OpenAI 客户端
+        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         # 加载 persona
         self.personas = load_personas()
@@ -42,26 +41,36 @@ class RAGAgent:
             raise ValueError("角色 persona 加载失败")
 
     def add_documents(self, docs):
-        # docs: list of (text, metadata)
+        """
+        添加文档到 FAISS 索引。
+        docs: [(text, metadata)]
+        """
         embeddings = [self.embedder.embed_text(text) for text, _ in docs]
-        embeddings = np.array(embeddings, dtype="float32")
-        self.index.add(embeddings)  # 将文档嵌入添加到 FAISS 索引中
-        self.documents.extend(docs)  # 添加文档元数据
+        self.index.add(np.array(embeddings, dtype="float32"))
+        self.documents.extend(docs)
 
-   def retrieve(self, query, top_k=5):
-    # 将查询文本转换为嵌入
-    embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
+    def retrieve(self, query, top_k=5):
+        """
+        根据查询文本从 FAISS 索引中检索相关文档。
+        """
+        # 将查询文本转换为嵌入
+        embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
 
-    # 执行 FAISS 查询，获取最近的 top_k 个索引
-    _, indices = self.index.search(embedding, top_k)
+        # 执行 FAISS 查询，获取最近的 top_k 个索引
+        _, indices = self.index.search(embedding, top_k)
 
-    # 如果返回的索引超出了文档范围，过滤掉无效索引
-    valid_indices = [i for i in indices[0] if i < len(self.documents)]
-
-    # 返回有效的文档
-    return [self.documents[i] for i in valid_indices]
+        # 返回根据查询索引获取到的文档，处理索引越界的情况
+        result_documents = []
+        for i in indices[0]:
+            if i < len(self.documents):  # 确保索引不超出文档范围
+                result_documents.append(self.documents[i])
+        
+        return result_documents
 
     def ask(self, question):
+        """
+        向 OpenAI 请求生成回答，并基于已有的文档返回引用内容。
+        """
         context_pairs = self.retrieve(question)
         system_prompt = self.persona["system_prompt"]
 
@@ -81,13 +90,14 @@ class RAGAgent:
                 请以你的风格回答，引用资料内容，不得编造。
                 """
 
+        # 消息列表，包含系统提示和对话历史
         messages = [{"role": "system", "content": system_prompt}]
         for q, a in self.history[-5:]:
             messages.append({"role": "user", "content": q})
             messages.append({"role": "assistant", "content": a})
         messages.append({"role": "user", "content": user_prompt})
 
-        # 使用 self.openai_client 调用 ChatCompletion
+        # 使用 OpenAI API 获取回答
         response = self.openai_client.chat.completions.create(
             model="gpt-4",
             messages=messages,
@@ -109,4 +119,3 @@ if __name__ == "__main__":
             break
         answer = agent.ask(question)
         print(f"\n💡 回答（{persona_id}）：\n{answer}")
-
