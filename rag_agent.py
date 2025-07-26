@@ -1,3 +1,4 @@
+所以请修改“import os
 import json
 import chromadb
 import streamlit as st
@@ -96,8 +97,4 @@ if __name__ == "__main__":
         answer = agent.ask(question)
         print(f"\n💡 回答（{persona_id}）：\n{answer}")
 
-print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])
-
-
-print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])
-
+print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])”
