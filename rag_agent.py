@@ -1,10 +1,9 @@
 import os
 import json
-import faiss
-import numpy as np
 import streamlit as st
 from openai import OpenAI
 from embedding_model import LocalEmbeddingModel
+import chromadb
 
 # 加载人物 personas.json 文件
 def load_personas():
@@ -16,10 +15,13 @@ def load_personas():
         return json.load(f)
 
 class RAGAgent:
-    def __init__(self, persona=None, persist_dir="faiss_index"):
-        # 初始化本地向量检索
+    def __init__(self, persona=None, persist_dir="chromadb_index"):
+        # 初始化 LocalEmbeddingModel 用于文本嵌入
         self.embedder = LocalEmbeddingModel()
-        self.index = faiss.IndexFlatL2(self.embedder.dim)
+
+        # 使用 chromadb 初始化向量数据库
+        self.client = chromadb.Client()
+        self.collection = self.client.create_collection(name="dao_knowledge")  # 创建或获取数据库集合
         self.documents = []  # [(text, metadata)] 用于存储文档
         self.persona = persona
         self.history = []
@@ -43,41 +45,43 @@ class RAGAgent:
 
     def add_documents(self, docs):
         """
-        添加文档到 FAISS 索引。
+        添加文档到 chromadb 数据库。
         docs: [(text, metadata)]
         """
+        # 获取文档的嵌入表示
         embeddings = [self.embedder.embed_text(text) for text, _ in docs]
-        self.index.add(np.array(embeddings, dtype="float32"))
+        
+        # 使用 chromadb 存储嵌入和文档
+        for doc, embedding in zip(docs, embeddings):
+            self.collection.add(
+                documents=[doc[0]],  # 文本
+                metadatas=[doc[1]],   # 元数据
+                embeddings=[embedding]  # 嵌入
+            )
         self.documents.extend(docs)
 
     def retrieve(self, query, top_k=5):
         """
-        根据查询文本从 FAISS 索引中检索相关文档。
+        根据查询文本从 chromadb 中检索相关文档。
         """
         # 将查询文本转换为嵌入
-        embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
-    
-        # 执行 FAISS 查询，获取最近的 top_k 个索引
-        _, indices = self.index.search(embedding, top_k)
-    
-        # 如果没有找到结果，则返回空列表
-        if indices.size == 0:
-            st.warning("没有找到相关文档")
-            return []
-    
-        # 检查索引越界并返回有效的文档
+        embedding = self.embedder.embed_text(query)
+        
+        # 使用 chromadb 查询相关的 top_k 个文档
+        results = self.collection.query(
+            query_embeddings=[embedding],
+            n_results=top_k
+        )
+        
+        # 检查结果并返回有效文档
         result_documents = []
-        for i in indices[0]:
-            if i < len(self.documents):  # 确保索引不超出文档范围
-                result_documents.append(self.documents[i])
-            else:
-                print(f"警告：索引 {i} 超出了文档列表的范围。")
-    
-        # 如果没有返回任何文档，提示并返回空列表
+        for text, meta in zip(results["documents"][0], results["metadatas"][0]):
+            result_documents.append((text, meta))
+        
         if len(result_documents) == 0:
             st.warning("没有找到相关文档")
             return []
-    
+
         return result_documents
 
     def ask(self, question):
