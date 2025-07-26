@@ -1,12 +1,8 @@
-import os
 import json
 import chromadb
+import streamlit as st
 from openai import OpenAI
-from dotenv import load_dotenv
 from embedding_model import LocalEmbeddingModel
-
-# ===== 加载 .env 文件（必须在模块级别加载） =====
-load_dotenv()
 
 # ===== 加载人物 personas.json 文件 =====
 def load_personas():
@@ -19,15 +15,16 @@ def load_personas():
 
 # ===== 核心 Agent 类 =====
 class RAGAgent:
-    def __init__(self, persona=None, persist_dir="chroma_store"):
+    def __init__(self, persona=None, persist_dir=None):  # 设置为 None 使用内存数据库
         # 初始化本地向量检索
         self.embedder = LocalEmbeddingModel()
+        # 设置 persist_dir 为 None 使用内存数据库
         self.vector_client = chromadb.PersistentClient(path=persist_dir)
         self.collection = self.vector_client.get_or_create_collection(name="dao_knowledge")
         self.history = []
 
-        # 初始化 OpenAI 客户端
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        # 使用 Streamlit Secrets 获取 OpenAI API 密钥
+        self.openai_client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
         # 加载导师 persona
         self.personas = load_personas()
@@ -100,4 +97,5 @@ if __name__ == "__main__":
         answer = agent.ask(question)
         print(f"\n💡 回答（{persona_id}）：\n{answer}")
 
-print("🔍 当前 OpenAI Key 来自 .env：", os.getenv("OPENAI_API_KEY"))
+print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])
+
