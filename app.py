@@ -157,8 +157,6 @@ if (
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
-            st.write(f"<i>The sage is contemplating...</i><br>{question}", unsafe_allow_html=True)
-
             answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
             st.rerun()
