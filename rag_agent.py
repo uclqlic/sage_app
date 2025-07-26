@@ -50,7 +50,7 @@ class RAGAgent:
         self.index.add(np.array(embeddings, dtype="float32"))
         self.documents.extend(docs)
 
-    def retrieve(self, query, top_k=5):
+     def retrieve(self, query, top_k=5):
         """
         根据查询文本从 FAISS 索引中检索相关文档。
         """
@@ -59,6 +59,11 @@ class RAGAgent:
     
         # 执行 FAISS 查询，获取最近的 top_k 个索引
         _, indices = self.index.search(embedding, top_k)
+    
+        # 如果没有找到结果，则返回空列表
+        if indices.size == 0:
+            st.warning("没有找到相关文档")
+            return []
     
         # 检查索引越界并返回有效的文档
         result_documents = []
@@ -72,7 +77,9 @@ class RAGAgent:
         if len(result_documents) == 0:
             st.warning("没有找到相关文档")
             return []
-    return result_documents
+    
+        return result_documents
+
 
 
     def ask(self, question):
