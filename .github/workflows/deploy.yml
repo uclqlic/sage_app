@@ -27,4 +27,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # 获取 GitHub Secrets 中的 OPENAI_API_KEY
         run: |
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env  # 创建 .env 文件并将密钥写入其中
+          # 显示创建的 .env 文件内容（用于调试）
+          cat .env
           streamlit run app.py  # 启动 Streamlit 应用
+
