@@ -113,7 +113,9 @@ mentor_names = list(personas.keys())
 
 # ===== 左侧栏：选择导师 =====
 with st.sidebar:
-    st.markdown("### **Choose Your Sage**", style="font-size:1.2rem; font-weight:600; color:#333;")
+    st.markdown("""
+        <h3 style="font-size:1.2rem; font-weight:600; color:#333;">Choose Your Sage</h3>
+    """, unsafe_allow_html=True)
     selected_mentor = st.selectbox("Select Sage", mentor_names, index=mentor_names.index(st.session_state.selected_mentor) if "selected_mentor" in st.session_state else 0)
 
 # ===== 如果选定的导师发生变化，则重新创建 RAGAgent 实例 =====
