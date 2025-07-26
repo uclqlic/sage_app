@@ -2,6 +2,7 @@ import os
 import json
 import faiss
 import numpy as np
+import streamlit as st
 from openai import OpenAI
 from embedding_model import LocalEmbeddingModel
 
@@ -23,8 +24,8 @@ class RAGAgent:
         self.persona = persona
         self.history = []
 
-        # 初始化 OpenAI 客户端
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        # 使用 Streamlit Secrets 获取 OpenAI API 密钥
+        self.openai_client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
         # 加载 persona
         self.personas = load_personas()
@@ -119,3 +120,5 @@ if __name__ == "__main__":
             break
         answer = agent.ask(question)
         print(f"\n💡 回答（{persona_id}）：\n{answer}")
+
+print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])
