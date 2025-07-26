@@ -1,9 +1,15 @@
-import os
 import json
 import faiss
 import numpy as np
-from openai import OpenAI
+import streamlit as st
+import openai  # 确保使用 openai 库
 from embedding_model import LocalEmbeddingModel
+
+# 通过 header 使用身份验证令牌（如果 auth_token 包含 API Key）
+header = {
+    "authentication": st.secrets["auth_token"],  # 用于身份验证
+    "content-type": "application/json"
+}
 
 # 加载人物设定
 def load_personas():
@@ -16,13 +22,10 @@ def load_personas():
 
 personas = load_personas()
 
-# 直接从环境变量中获取 OpenAI API Key
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("未在环境变量中找到 OPENAI_API_KEY")
+# 不再需要单独设置 openai.api_key，header 已经包含身份验证信息
+openai.api_key = None  # 不设置 API Key
 
-client = OpenAI(api_key=api_key)
-
+# 继续进行 OpenAI 请求
 class RAGAgent:
     def __init__(self, persona="孔子"):
         self.embedder = LocalEmbeddingModel()
@@ -79,7 +82,8 @@ class RAGAgent:
             messages.append({"role": "assistant", "content": a})
         messages.append({"role": "user", "content": user_prompt})
 
-        response = client.chat.completions.create(
+        # 使用 openai 接口获取回答
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages,
             temperature=0.7
