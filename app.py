@@ -70,7 +70,7 @@ def set_sidebar_background(image_path):
             border-radius: 12px;
             margin: 1rem;
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;  /* Adjust font size */
+            font-size: 0.95rem;  /* 调整为稍小字体 */
         }}
         </style>
         """, unsafe_allow_html=True)
@@ -156,4 +156,12 @@ if (
 
         except Exception as e:
             st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating: {e}
+            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating: {e}"
+            st.rerun()
+
+# ===== 页脚 =====
+st.markdown("""
+<div style="text-align:center; margin-top:3rem; color:#888888;">
+    <p>道可道，非常道 · 名可名，非常名</p>
+</div>
+""", unsafe_allow_html=True)
