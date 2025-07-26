@@ -7,9 +7,9 @@ from rag_agent import RAGAgent
 # ===== 页面配置 =====
 st.set_page_config(
     page_title="Dao AI - Answer your question in Chinese Wisdom",
-    page_icon="🌮",
-    layout="wide",  # Use full width layout for better visual appeal
-    initial_sidebar_state="collapsed"  # Sidebar starts collapsed for a cleaner interface
+    page_icon="",
+    layout="wide",  # 使用全宽布局，增强视觉效果
+    initial_sidebar_state="collapsed"  # 初始侧边栏收起，清爽简洁
 )
 
 # ===== 加载 base64 图片 =====
@@ -40,7 +40,7 @@ def set_background(image_path):
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(255, 255, 255, 0.88);
+                background: rgba(255, 255, 255, 0.7);  /* 半透明效果 */
                 z-index: -1;
                 pointer-events: none;
             }}
@@ -60,17 +60,18 @@ def set_sidebar_background(image_path):
             background-size: cover;
             background-position: center top;
             background-repeat: no-repeat;
-            backdrop-filter: blur(6px);
-            border-right: 1px solid rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px); /* 增强模糊效果 */
+            border-right: 1px solid rgba(0,0,0,0.1); /* 更清晰的边框 */
             font-family: 'Inter', sans-serif;
         }}
         [data-testid="stSidebar"] > div:first-child {{
-            background: rgba(255,255,255,0.85);
-            padding: 1rem;
-            border-radius: 12px;
-            margin: 1rem;
+            background: rgba(255,255,255,0.9);
+            padding: 1.5rem;
+            border-radius: 15px;  /* 圆角 */
+            margin: 1.5rem;
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;  /* 调整为稍小字体 */
+            font-size: 1rem;  /* 增加字体大小 */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 增加阴影 */
         }}
         </style>
         """, unsafe_allow_html=True)
@@ -79,9 +80,9 @@ def set_sidebar_background(image_path):
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-.stApp { font-family: 'Inter', sans-serif; }
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
+.stApp { font-family: 'Inter', sans-serif; line-height: 1.6; }
+#MainMenu {visibility: hidden;}  /* 隐藏菜单 */
+footer {visibility: hidden;}  /* 隐藏页脚 */
 </style>
 """, unsafe_allow_html=True)
 
@@ -93,10 +94,10 @@ set_sidebar_background("装饰云彩.png")
 dao_icon_base64 = image_to_base64("道icon.png")
 if dao_icon_base64:
     st.markdown(f"""
-    <div style="text-align:center; margin-bottom:2rem;">
-        <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:120px; border-radius:50%;">
-        <h1 style="font-size:3rem; font-weight:700;">Dao AI</h1>
-        <p style="font-size:1.2rem; color:#4a5568;">Chinese Wisdom · Enrich Your Mind & Soul</p>
+    <div style="text-align:center; margin-bottom:3rem;">
+        <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:140px; border-radius:50%; box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);">
+        <h1 style="font-size:3.5rem; font-weight:800; color:#333;">Dao AI</h1>
+        <p style="font-size:1.4rem; color:#555;">Chinese Wisdom · Enrich Your Mind & Soul</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -112,7 +113,7 @@ mentor_names = list(personas.keys())
 
 # ===== 左侧栏：选择导师 =====
 with st.sidebar:
-    st.markdown("**Choose Your Sage**")
+    st.markdown("### **Choose Your Sage**", style="font-size:1.2rem; font-weight:600; color:#333;")
     selected_mentor = st.selectbox("Select Sage", mentor_names, index=mentor_names.index(st.session_state.selected_mentor) if "selected_mentor" in st.session_state else 0)
 
 # ===== 如果选定的导师发生变化，则重新创建 RAGAgent 实例 =====
@@ -131,7 +132,7 @@ if "agent" not in st.session_state:
 for msg in st.session_state.chat_history:
     with st.chat_message("user"):
         st.markdown(msg["question"])
-    with st.chat_message("assistant", avatar="🌮"):
+    with st.chat_message("assistant"):
         st.markdown(msg["answer"])
 
 # ===== 输入问题 =====
@@ -150,11 +151,11 @@ if (
     "answer" in st.session_state.chat_history[-1] and
     st.session_state.chat_history[-1]["answer"] == ""
 ):
-    with st.spinner("Thinking..."):
+    with st.spinner("The sage is reflecting..."):
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
-            st.write("Sage is contemplating...", question)
+            st.write(f"<i>The sage is contemplating...</i><br>{question}", unsafe_allow_html=True)
 
             answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
@@ -162,12 +163,13 @@ if (
 
         except Exception as e:
             st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating: {e}"
+            st.session_state.chat_history[-1]["answer"] = f"The sage is reflecting: {e}"
             st.rerun()
 
 # ===== 页脚 =====
 st.markdown("""
-<div style="text-align:center; margin-top:3rem; color:#888888;">
+<div style="text-align:center; margin-top:4rem; color:#777;">
     <p>道可道，非常道 · 名可名，非常名</p>
 </div>
 """, unsafe_allow_html=True)
+
