@@ -154,5 +154,21 @@ if (
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
-            st.write("Sage is con
+            st.write("Sage is contemplating...", question)
+
+            answer = st.session_state.agent.ask(question)
+            st.session_state.chat_history[-1]["answer"] = answer
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
+            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating: {e}"
+            st.rerun()
+
+# ===== 页脚 =====
+st.markdown("""
+<div style="text-align:center; margin-top:3rem; color:#888888;">
+    <p>道可道，非常道 · 名可名，非常名</p>
+</div>
+""", unsafe_allow_html=True)
 
