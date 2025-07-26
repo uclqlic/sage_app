@@ -107,14 +107,15 @@ with st.sidebar:
 # ===== 设置头像路径 =====
 def get_avatar(mentor_name):
     avatars = {
-        "Laozi": "laozi_icon.png",  # Example image for Laozi
-        "Zhuangzi": "zhuangzi_icon.png",  # Example image for Zhuangzi
+        "Laozi": "images/laozi_icon.png",  # Example image for Laozi
+        "Zhuangzi": "images/zhuangzi_icon.png",  # Example image for Zhuangzi
         # Add more mentors and their avatars here
     }
-    return avatars.get(mentor_name, "default_avatar.png")
+    return avatars.get(mentor_name, "images/default_avatar.png")
 
-# ===== 初始化 Agent（切换清空聊天） =====
+# ===== 更新 persona 和初始化 Agent（切换清空聊天） =====
 if "selected_mentor" not in st.session_state or st.session_state.selected_mentor != selected_mentor:
+    # 清空聊天历史和重新设置persona
     st.session_state.selected_mentor = selected_mentor
     st.session_state.chat_history = []  # Clear the chat history on mentor change
     st.session_state.agent = RAGAgent(persona=st.session_state.selected_mentor)
@@ -123,7 +124,7 @@ if "selected_mentor" not in st.session_state or st.session_state.selected_mentor
 mentor_avatar = get_avatar(st.session_state.selected_mentor)
 
 for msg in st.session_state.chat_history:
-    with st.chat_message("user", avatar="user_avatar.png"):  # Assuming user uploads or has a default avatar
+    with st.chat_message("user", avatar="images/user_avatar.png"):  # Assuming user uploads or has a default avatar
         st.markdown(msg["question"])
     with st.chat_message("assistant", avatar=mentor_avatar):
         st.markdown(msg["answer"])
