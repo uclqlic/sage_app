@@ -3,7 +3,7 @@ import json
 import faiss
 import numpy as np
 from openai import OpenAI
-import streamlit as st
+from dotenv import load_dotenv
 from embedding_model import LocalEmbeddingModel
 
 # 加载人物设定
@@ -17,16 +17,9 @@ def load_personas():
 
 personas = load_personas()
 
-# 从 Streamlit Secrets 中获取 OpenAI API Key
-try:
-    api_key = st.secrets["OPENAI_API_KEY"]  # 直接通过字典方式访问
-    if not api_key:
-        raise ValueError("未找到有效的 OPENAI_API_KEY")
-    st.write(f"API Key 成功加载：{api_key[:5]}...")  # 输出部分 API Key 进行调试
-except KeyError:
-    raise ValueError("在 Streamlit Secrets 中未找到 OPENAI_API_KEY")
-
-client = OpenAI(api_key=api_key)
+# 加载 .env 中的 OpenAI Key
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class RAGAgent:
     def __init__(self, persona="孔子"):
