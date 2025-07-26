@@ -95,7 +95,7 @@ dao_icon_base64 = image_to_base64("道icon.png")
 if dao_icon_base64:
     st.markdown(f"""
     <div style="text-align:center; margin-bottom:3rem; display: flex; align-items: center; justify-content: center; gap: 20px;">
-        <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:140px; border-radius:50%; box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);">
+        <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:140px; border-radius:50%; box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1); margin-right: 40px;"> <!-- 调整 margin-right 来平移头像 -->
         <div>
             <h1 style="font-size:3.5rem; font-weight:800; color:#333;">Dao AI</h1>
             <p style="font-size:1.4rem; color:#555;">Chinese Wisdom · Enrich Your Mind & Soul</p>
