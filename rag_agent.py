@@ -97,4 +97,3 @@ if __name__ == "__main__":
         answer = agent.ask(question)
         print(f"\n💡 回答（{persona_id}）：\n{answer}")
 
-print("🔍 当前 OpenAI Key 来自 secrets：", st.secrets["openai"]["api_key"])”
