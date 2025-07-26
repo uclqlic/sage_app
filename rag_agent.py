@@ -51,7 +51,9 @@ class RAGAgent:
     def retrieve(self, query, top_k=5):
         embedding = self.embedder.embed_text(query).astype("float32").reshape(1, -1)
         _, indices = self.index.search(embedding, top_k)
-        return [self.documents[i] for i in indices[0] if i < len(self.documents)]
+        # 如果返回的索引超出了文档范围，避免引发 index out of range 错误
+        valid_indices = [i for i in indices[0] if i < len(self.documents)]
+    return [self.documents[i] for i in valid_indices]
 
     def ask(self, question):
         context_pairs = self.retrieve(question)
