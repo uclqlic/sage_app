@@ -50,7 +50,7 @@ class RAGAgent:
         self.index.add(np.array(embeddings, dtype="float32"))
         self.documents.extend(docs)
 
-     def retrieve(self, query, top_k=5):
+    def retrieve(self, query, top_k=5):
         """
         根据查询文本从 FAISS 索引中检索相关文档。
         """
@@ -79,8 +79,6 @@ class RAGAgent:
             return []
     
         return result_documents
-
-
 
     def ask(self, question):
         """
