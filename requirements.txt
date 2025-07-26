@@ -5,5 +5,4 @@ transformers
 sentence-transformers
 python-dotenv
 torch==2.6
-chromadb
-sqlite3>=3.35.0
+chromadb>=3.35.0
