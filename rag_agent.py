@@ -1,4 +1,4 @@
-所以请修改“import os
+import os
 import json
 import chromadb
 import streamlit as st
