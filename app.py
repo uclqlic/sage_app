@@ -94,10 +94,12 @@ set_sidebar_background("装饰云彩.png")
 dao_icon_base64 = image_to_base64("道icon.png")
 if dao_icon_base64:
     st.markdown(f"""
-    <div style="text-align:center; margin-bottom:3rem;">
+    <div style="text-align:center; margin-bottom:3rem; display: flex; align-items: center; justify-content: center; gap: 20px;">
         <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:140px; border-radius:50%; box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);">
-        <h1 style="font-size:3.5rem; font-weight:800; color:#333;">Dao AI</h1>
-        <p style="font-size:1.4rem; color:#555;">Chinese Wisdom · Enrich Your Mind & Soul</p>
+        <div>
+            <h1 style="font-size:3.5rem; font-weight:800; color:#333;">Dao AI</h1>
+            <p style="font-size:1.4rem; color:#555;">Chinese Wisdom · Enrich Your Mind & Soul</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -157,6 +159,8 @@ if (
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
+            st.write(f"<i>The sage is contemplating...</i><br>{question}", unsafe_allow_html=True)
+
             answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
             st.rerun()
@@ -172,4 +176,3 @@ st.markdown("""
     <p>道可道，非常道 · 名可名，非常名</p>
 </div>
 """, unsafe_allow_html=True)
-
