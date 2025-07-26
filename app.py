@@ -6,10 +6,10 @@ from rag_agent import RAGAgent
 
 # ===== 页面配置 =====
 st.set_page_config(
-    page_title="Dao AI - Answer Your Question in Chinese Wisdom",
-    page_icon="🌱",  # 更改图标为简洁的绿色图标，符合东方风格
-    layout="wide",  # 使用宽布局以提高视觉吸引力
-    initial_sidebar_state="collapsed"  # 初始时收起侧边栏，使界面更清洁
+    page_title="Dao AI - Answer your question in Chinese Wisdom",
+    page_icon="🌮",
+    layout="wide",  # Use full width layout for better visual appeal
+    initial_sidebar_state="collapsed"  # Sidebar starts collapsed for a cleaner interface
 )
 
 # ===== 加载 base64 图片 =====
@@ -70,7 +70,7 @@ def set_sidebar_background(image_path):
             border-radius: 12px;
             margin: 1rem;
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
+            font-size: 0.95rem;  /* 调整为稍小字体 */
         }}
         </style>
         """, unsafe_allow_html=True)
@@ -86,17 +86,17 @@ footer {visibility: hidden;}
 """, unsafe_allow_html=True)
 
 # ===== 背景图 =====
-set_background("watercolor_background.png")  # 更换为水墨画背景图
-set_sidebar_background("cloud_decor.png")  # 更换为装饰云彩背景图
+set_background("水墨背景.png")
+set_sidebar_background("装饰云彩.png")
 
 # ===== 标题图标和文字 =====
-dao_icon_base64 = image_to_base64("dao_icon.png")
+dao_icon_base64 = image_to_base64("道icon.png")
 if dao_icon_base64:
     st.markdown(f"""
     <div style="text-align:center; margin-bottom:2rem;">
-        <img src="data:image/png;base64,{dao_icon_base64}" alt="Dao AI" style="width:120px; border-radius:50%;">
-        <h1 style="font-size:3.5rem; font-weight:700; color:#2d3748;">Dao AI</h1>
-        <p style="font-size:1.2rem; color:#4a5568;">Enrich Your Mind & Soul with Chinese Wisdom</p>
+        <img src="data:image/png;base64,{dao_icon_base64}" alt="道" style="width:120px; border-radius:50%;">
+        <h1 style="font-size:3rem; font-weight:700;">Dao AI</h1>
+        <p style="font-size:1.2rem; color:#4a5568;">Chinese Wisdom · Enrich Your Mind & Soul</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -112,8 +112,8 @@ mentor_names = list(personas.keys())
 
 # ===== 左侧栏：选择导师 =====
 with st.sidebar:
-    st.markdown("**Choose Your Sage**", style="font-size:1.25rem; font-weight:600;")
-    selected_mentor = st.selectbox("Select a Mentor", mentor_names, index=mentor_names.index(st.session_state.selected_mentor) if "selected_mentor" in st.session_state else 0)
+    st.markdown("**Choose Your Sage**")
+    selected_mentor = st.selectbox("Select Sage", mentor_names, index=mentor_names.index(st.session_state.selected_mentor) if "selected_mentor" in st.session_state else 0)
 
 # ===== 如果选定的导师发生变化，则重新创建 RAGAgent 实例 =====
 if selected_mentor != st.session_state.get("selected_mentor", ""):
@@ -130,12 +130,12 @@ if "agent" not in st.session_state:
 # ===== 显示聊天历史 =====
 for msg in st.session_state.chat_history:
     with st.chat_message("user"):
-        st.markdown(f"<div style='color:#2d3748; font-size:1.1rem;'> {msg['question']} </div>", unsafe_allow_html=True)
-    with st.chat_message("assistant"):
-        st.markdown(f"<div style='color:#4a5568; font-size:1.1rem;'> {msg['answer']} </div>", unsafe_allow_html=True)
+        st.markdown(msg["question"])
+    with st.chat_message("assistant", avatar="🌮"):
+        st.markdown(msg["answer"])
 
 # ===== 输入问题 =====
-user_question = st.chat_input("Ask your question...")
+user_question = st.chat_input("Ask anything...")
 
 if user_question:
     st.session_state.chat_history.append({"question": user_question, "answer": ""})
@@ -150,19 +150,19 @@ if (
     "answer" in st.session_state.chat_history[-1] and
     st.session_state.chat_history[-1]["answer"] == ""
 ):
-    with st.spinner("The sage is contemplating..."):
+    with st.spinner("Thinking..."):
         try:
             # 执行问答
             question = st.session_state.chat_history[-1]["question"]
-            st.write("The sage is contemplating your question...")
+            st.write("Sage is contemplating...", question)
 
             answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
             st.rerun()
 
         except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"The sage is meditating: {e}"
+            st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
+            st.session_state.chat_history[-1]["answer"] = f"Sage is meditating: {e}"
             st.rerun()
 
 # ===== 页脚 =====
@@ -170,5 +170,4 @@ st.markdown("""
 <div style="text-align:center; margin-top:3rem; color:#888888;">
     <p>道可道，非常道 · 名可名，非常名</p>
 </div>
-""", unsafe_allow_html=True)
-
+""", unsafe_allow_html=True)”
