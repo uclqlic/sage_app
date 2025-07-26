@@ -6,11 +6,8 @@ import streamlit as st
 import openai  # 确保使用 openai 库
 from embedding_model import LocalEmbeddingModel
 
-# 通过 header 使用身份验证令牌（如果 auth_token 包含 API Key）
-header = {
-    "authentication": st.secrets["auth_token"],  # 用于身份验证
-    "content-type": "application/json"
-}
+# 使用 Streamlit Secrets 获取 OpenAI API Key
+openai.api_key = st.secrets["OPENAI_API_KEY"]  # 从 Streamlit Secrets 获取 API 密钥
 
 # 加载人物设定
 def load_personas():
@@ -23,10 +20,7 @@ def load_personas():
 
 personas = load_personas()
 
-# 不再需要单独设置 openai.api_key，header 已经包含身份验证信息
-openai.api_key = None  # 不设置 API Key
-
-# 继续进行 OpenAI 请求
+# RAGAgent 类
 class RAGAgent:
     def __init__(self, persona="孔子"):
         self.embedder = LocalEmbeddingModel()
@@ -105,3 +99,4 @@ if __name__ == "__main__":
         agent.persona = role_id
         answer = agent.ask(question)
         print(f"\n💡 回答（{role_id}）：\n{answer}")
+
