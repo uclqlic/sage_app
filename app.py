@@ -20,6 +20,24 @@ def image_to_base64(image_path):
     except FileNotFoundError:
         return None
 
+def get_avatar_base64(name: str):
+    path = os.path.join("persona_protrait", f"{name}.png")
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            return "data:image/png;base64," + base64.b64encode(f.read()).decode()
+    fallback = os.path.join("persona_protrait", "bot_icon.png")
+    if os.path.exists(fallback):
+        with open(fallback, "rb") as f:
+            return "data:image/png;base64," + base64.b64encode(f.read()).decode()
+    return None
+
+def get_user_avatar():
+    path = os.path.join("persona_protrait", "user_icon.png")
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            return "data:image/png;base64," + base64.b64encode(f.read()).decode()
+    return None
+
 # ===== 设置背景 =====
 def set_background(image_path):
     bg_base64 = image_to_base64(image_path)
@@ -132,9 +150,9 @@ if "agent" not in st.session_state:
 
 # ===== 显示聊天历史 =====
 for msg in st.session_state.chat_history:
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar=get_user_avatar()):
         st.markdown(msg["question"])
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=portrait_base64):
         st.markdown(msg["answer"])
 
 # ===== 输入问题 =====
