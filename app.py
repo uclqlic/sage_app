@@ -152,11 +152,6 @@ st.markdown(f"""
            max-width: 450px; 
            margin-left: auto; margin-right: auto;
            position: relative;">
-    <!-- 装饰性边框 -->
-    <div style="position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
-                background: linear-gradient(45deg, rgba(180,180,180,0.2), rgba(220,220,220,0.1));
-                border-radius: 25px; z-index: -1;"></div>
-    
     <div style="font-size:1.3rem; font-weight:500; color:#2c3e50; margin-bottom: 0.8rem;
                 text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
         💬 正在与{st.session_state.selected_mentor}对话
