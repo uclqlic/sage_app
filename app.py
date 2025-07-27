@@ -141,24 +141,26 @@ if "agent" not in st.session_state:
 # ===== 获取导师头像（聊天气泡头像） =====
 portrait_base64 = get_avatar_base64(st.session_state.selected_mentor)
 
-# ===== 显示当前对话导师提示（中式风格） =====
+# ===== 显示当前对话导师提示（融入背景版本） =====
 st.markdown(f"""
 <div style="text-align:center; margin:2rem 0 1rem; padding: 1.5rem 2rem; 
-           background: linear-gradient(135deg, rgba(240,240,240,0.3), rgba(255,255,255,0.2)); 
-           border: 1px solid rgba(200,200,200,0.4);
-           border-radius: 25px; 
-           backdrop-filter: blur(10px);
-           box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2); 
+           background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(240,245,250,0.1)); 
+           border: 1px solid rgba(255,255,255,0.2);
+           border-radius: 30px; 
+           backdrop-filter: blur(15px);
+           box-shadow: 0 8px 32px rgba(0,0,0,0.08), 
+                       0 1px 0 rgba(255,255,255,0.3) inset,
+                       0 -1px 0 rgba(0,0,0,0.05) inset; 
            max-width: 450px; 
            margin-left: auto; margin-right: auto;
            position: relative;">
     <div style="font-size:1.3rem; font-weight:500; color:#2c3e50; margin-bottom: 0.8rem;
-                text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
-        💬 正在与{st.session_state.selected_mentor}对话
+                text-shadow: 0 1px 3px rgba(255,255,255,0.9);">
+        🧘 Chatting with {st.session_state.selected_mentor}
     </div>
     <div style="font-size:1rem; color:#5a6c7d;
-                text-shadow: 0 1px 2px rgba(255,255,255,0.6);">
-        向智者请教人生智慧...
+                text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
+        Ask for ancient wisdom and guidance
     </div>
 </div>
 """, unsafe_allow_html=True)
