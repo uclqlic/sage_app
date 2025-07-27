@@ -141,16 +141,28 @@ if "agent" not in st.session_state:
 # ===== 获取导师头像（聊天气泡头像） =====
 portrait_base64 = get_avatar_base64(st.session_state.selected_mentor)
 
-# ===== 显示当前对话导师提示（替代中央大头像） =====
+# ===== 显示当前对话导师提示（中式风格） =====
 st.markdown(f"""
-<div style="text-align:center; margin:2rem 0 1rem; padding: 1rem; 
-           background: rgba(255,255,255,0.8); border-radius: 15px; 
-           box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 400px; 
-           margin-left: auto; margin-right: auto;">
-    <div style="font-size:1.2rem; font-weight:600; color:#333; margin-bottom: 0.5rem;">
+<div style="text-align:center; margin:2rem 0 1rem; padding: 1.5rem 2rem; 
+           background: linear-gradient(135deg, rgba(240,240,240,0.3), rgba(255,255,255,0.2)); 
+           border: 1px solid rgba(200,200,200,0.4);
+           border-radius: 25px; 
+           backdrop-filter: blur(10px);
+           box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2); 
+           max-width: 450px; 
+           margin-left: auto; margin-right: auto;
+           position: relative;">
+    <!-- 装饰性边框 -->
+    <div style="position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+                background: linear-gradient(45deg, rgba(180,180,180,0.2), rgba(220,220,220,0.1));
+                border-radius: 25px; z-index: -1;"></div>
+    
+    <div style="font-size:1.3rem; font-weight:500; color:#2c3e50; margin-bottom: 0.8rem;
+                text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
         💬 正在与{st.session_state.selected_mentor}对话
     </div>
-    <div style="font-size:0.9rem; color:#666;">
+    <div style="font-size:1rem; color:#5a6c7d;
+                text-shadow: 0 1px 2px rgba(255,255,255,0.6);">
         向智者请教人生智慧...
     </div>
 </div>
