@@ -235,6 +235,18 @@ with st.sidebar:
                 </div>
                 """, unsafe_allow_html=True)
         
+        # 添加自定义CSS来改变按钮颜色
+        if is_selected:
+            st.markdown("""
+            <style>
+            div[data-testid="stSidebar"] button[kind="primary"] {
+                background: linear-gradient(135deg, #4a6fa5, #2d4a6b) !important;
+                border: 1px solid #2d4a6b !important;
+                color: white !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+        
         with col2:
             # 创建按钮
             if st.button(
