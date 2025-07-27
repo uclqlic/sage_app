@@ -276,19 +276,13 @@ if "chat_history" not in st.session_state:
 # ===== 获取导师头像（聊天气泡头像） =====
 portrait_base64 = get_avatar_base64(st.session_state.selected_mentor)
 
-# ===== 显示当前对话导师提示（极简融入版本） =====
+# ===== 显示当前对话导师提示（纯文字版本） =====
 st.markdown(f"""
-<div style="text-align:center; margin:2rem 0 1rem; padding: 0.8rem 1.5rem; 
-           background: rgba(255,255,255,0.03); 
-           border: none;
-           border-radius: 50px; 
-           backdrop-filter: blur(5px);
-           max-width: 350px; 
-           margin-left: auto; margin-right: auto;">
-    <div style="font-family: 'Inter', sans-serif; font-size:1rem; font-weight:400; 
-                color:#2c3e50; opacity: 0.7; letter-spacing: 0.02em;
-                text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
-        Chatting with {st.session_state.selected_mentor}
+<div style="text-align:center; margin:2rem 0 1.5rem;">
+    <div style="font-family: 'Noto Serif', serif; font-size:1.1rem; font-weight:400; 
+                color:#4a5568; opacity: 0.8; letter-spacing: 0.02em;
+                text-shadow: 0 1px 2px rgba(255,255,255,0.9);">
+        Seeking wisdom from {st.session_state.selected_mentor}
     </div>
 </div>
 """, unsafe_allow_html=True)
