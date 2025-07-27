@@ -189,32 +189,72 @@ def load_personas():
 personas = load_personas()
 mentor_names = list(personas.keys())
 
-# ===== 左侧栏选择导师（协调版本） =====
+# ===== 左侧栏选择导师（卡片式布局） =====
 with st.sidebar:
     st.markdown("""
         <h3 style="font-family: 'Inter', sans-serif; font-size:1.1rem; font-weight:600; 
-                   color:#2d3748; margin-bottom: 1rem; letter-spacing: -0.01em;">
+                   color:#2d3748; margin-bottom: 1.5rem; letter-spacing: -0.01em;">
             Choose Your Sage
         </h3>
     """, unsafe_allow_html=True)
     
-    # 使用简洁的下拉选择器
-    selected_mentor = st.selectbox(
-        "Select Sage", 
-        mentor_names, 
-        index=mentor_names.index(st.session_state.selected_mentor) if "selected_mentor" in st.session_state else 0
-    )
+    # 初始化选中的导师
+    if "selected_mentor" not in st.session_state:
+        st.session_state.selected_mentor = mentor_names[0]
+    
+    # 创建卡片式选择器
+    for mentor in mentor_names:
+        mentor_avatar = get_avatar_base64(mentor)
+        is_selected = mentor == st.session_state.selected_mentor
+        
+        # 卡片样式
+        card_bg = "background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;" if is_selected else "background: rgba(248, 250, 252, 0.8); color: #374151;"
+        card_border = "border: 2px solid #1d4ed8;" if is_selected else "border: 1px solid rgba(226, 232, 240, 0.8);"
+        card_shadow = "box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);" if is_selected else "box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);"
+        
+        # 头像处理
+        if mentor_avatar:
+            avatar_html = f'<img src="{mentor_avatar}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem; border: 2px solid {"rgba(255,255,255,0.3)" if is_selected else "rgba(226,232,240,0.5)"};">'
+        else:
+            avatar_bg = "background: rgba(255,255,255,0.2);" if is_selected else "background: linear-gradient(135deg, #667eea, #764ba2);"
+            avatar_html = f'<div style="width: 48px; height: 48px; border-radius: 50%; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1.2rem; {avatar_bg}">{mentor[0]}</div>'
+        
+        # 创建点击按钮
+        if st.button(
+            mentor,
+            key=f"sage_card_{mentor}",
+            use_container_width=True,
+            type="primary" if is_selected else "secondary"
+        ):
+            if mentor != st.session_state.selected_mentor:
+                st.session_state.selected_mentor = mentor
+                st.rerun()
+        
+        # 显示装饰性卡片
+        st.markdown(f"""
+        <div style="display: flex; align-items: center; padding: 1rem; margin: 0.5rem 0 1rem 0;
+                    border-radius: 16px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    {card_bg} {card_border} {card_shadow}
+                    backdrop-filter: blur(8px); pointer-events: none; margin-top: -3.5rem;">
+            {avatar_html}
+            <div style="flex: 1;">
+                <div style="font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500; margin-bottom: 0.25rem;">
+                    {mentor}
+                </div>
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.75rem; opacity: 0.8;">
+                    Ancient philosopher
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ===== 初始化 Agent =====
-if selected_mentor != st.session_state.get("selected_mentor", ""):
-    st.session_state.selected_mentor = selected_mentor
-    st.session_state.agent = RAGAgent(persona=selected_mentor)
-    st.session_state.chat_history = []
-
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+if "selected_mentor" not in st.session_state:
+    st.session_state.selected_mentor = mentor_names[0]
 if "agent" not in st.session_state:
     st.session_state.agent = RAGAgent(persona=st.session_state.selected_mentor)
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
 # ===== 获取导师头像（聊天气泡头像） =====
 portrait_base64 = get_avatar_base64(st.session_state.selected_mentor)
@@ -235,7 +275,7 @@ st.markdown(f"""
     <div style="font-family: 'Inter', sans-serif; font-size:1.25rem; font-weight:500; 
                 color:#1a202c; margin-bottom: 0.7rem; letter-spacing: -0.01em;
                 text-shadow: 0 1px 3px rgba(255,255,255,0.9);">
-        💭 Chatting with {st.session_state.selected_mentor}
+        Chatting with {st.session_state.selected_mentor}
     </div>
     <div style="font-family: 'Noto Serif', serif; font-size:0.95rem; font-weight:400;
                 color:#4a5568; letter-spacing: 0.01em;
