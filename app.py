@@ -189,7 +189,7 @@ def load_personas():
 personas = load_personas()
 mentor_names = list(personas.keys())
 
-# ===== 左侧栏选择导师（简化可点击版本） =====
+# ===== 左侧栏选择导师（带头像的稳定版本） =====
 with st.sidebar:
     st.markdown("""
         <h3 style="font-family: 'Inter', sans-serif; font-size:1.1rem; font-weight:600; 
@@ -202,22 +202,56 @@ with st.sidebar:
     if "selected_mentor" not in st.session_state:
         st.session_state.selected_mentor = mentor_names[0]
     
-    # 创建简洁的按钮选择器
+    # 为每个导师创建头像+按钮的组合
     for mentor in mentor_names:
         is_selected = mentor == st.session_state.selected_mentor
+        mentor_avatar = get_avatar_base64(mentor)
         
-        # 创建按钮
-        if st.button(
-            f"{mentor}",
-            key=f"sage_btn_{mentor}",
-            use_container_width=True,
-            type="primary" if is_selected else "secondary"
-        ):
-            if mentor != st.session_state.selected_mentor:
-                st.session_state.selected_mentor = mentor
-                st.session_state.agent = RAGAgent(persona=mentor)
-                st.session_state.chat_history = []
-                st.rerun()
+        # 创建两列布局：头像 + 按钮
+        col1, col2 = st.columns([1, 3])
+        
+        with col1:
+            # 显示头像
+            if mentor_avatar:
+                st.markdown(f"""
+                <div style="text-align: center; margin-bottom: 0.5rem;">
+                    <img src="{mentor_avatar}" 
+                         style="width: 45px; height: 45px; border-radius: 50%; 
+                                object-fit: cover; border: 2px solid {'#3b82f6' if is_selected else '#e5e7eb'};
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                # 如果没有头像，显示首字母
+                st.markdown(f"""
+                <div style="text-align: center; margin-bottom: 0.5rem;">
+                    <div style="width: 45px; height: 45px; border-radius: 50%; 
+                                background: {'#3b82f6' if is_selected else '#6b7280'}; 
+                                display: flex; align-items: center; justify-content: center; 
+                                color: white; font-weight: 600; font-size: 1.1rem;
+                                margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        {mentor[0]}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        with col2:
+            # 创建按钮
+            if st.button(
+                mentor,
+                key=f"sage_btn_{mentor}",
+                use_container_width=True,
+                type="primary" if is_selected else "secondary"
+            ):
+                if mentor != st.session_state.selected_mentor:
+                    st.session_state.selected_mentor = mentor
+                    st.session_state.agent = RAGAgent(persona=mentor)
+                    st.session_state.chat_history = []
+                    st.rerun()
+        
+        # 添加分隔线（除了最后一个）
+        if mentor != mentor_names[-1]:
+            st.markdown("<hr style='margin: 1rem 0; border: 0; height: 1px; background: rgba(0,0,0,0.1);'>", unsafe_allow_html=True)
 
 # ===== 初始化 Agent =====
 if "selected_mentor" not in st.session_state:
