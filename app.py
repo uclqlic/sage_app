@@ -189,7 +189,7 @@ def load_personas():
 personas = load_personas()
 mentor_names = list(personas.keys())
 
-# ===== 左侧栏选择导师（可点击卡片布局） =====
+# ===== 左侧栏选择导师（简化可点击版本） =====
 with st.sidebar:
     st.markdown("""
         <h3 style="font-family: 'Inter', sans-serif; font-size:1.1rem; font-weight:600; 
@@ -202,70 +202,22 @@ with st.sidebar:
     if "selected_mentor" not in st.session_state:
         st.session_state.selected_mentor = mentor_names[0]
     
-    # 创建可点击的卡片式选择器
+    # 创建简洁的按钮选择器
     for mentor in mentor_names:
-        mentor_avatar = get_avatar_base64(mentor)
         is_selected = mentor == st.session_state.selected_mentor
         
-        # 卡片样式
-        if is_selected:
-            card_style = """
-                background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
-                color: white; 
-                border: 2px solid #1d4ed8;
-                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
-            """
-            text_color = "color: white;"
-            subtitle_opacity = "opacity: 0.9;"
-            border_color = "rgba(255,255,255,0.3)"
-        else:
-            card_style = """
-                background: rgba(248, 250, 252, 0.8); 
-                color: #374151;
-                border: 1px solid rgba(226, 232, 240, 0.8);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            """
-            text_color = "color: #374151;"
-            subtitle_opacity = "opacity: 0.7;"
-            border_color = "rgba(226,232,240,0.5)"
-        
-        # 头像处理
-        if mentor_avatar:
-            avatar_html = f'<img src="{mentor_avatar}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem; border: 2px solid {border_color};">'
-        else:
-            avatar_bg = "background: rgba(255,255,255,0.2);" if is_selected else "background: linear-gradient(135deg, #667eea, #764ba2);"
-            avatar_html = f'<div style="width: 48px; height: 48px; border-radius: 50%; margin-right: 0.75rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1.2rem; {avatar_bg}">{mentor[0]}</div>'
-        
-        # 创建完整的可点击卡片
+        # 创建按钮
         if st.button(
-            f"Select {mentor}",
-            key=f"sage_select_{mentor}",
+            f"{mentor}",
+            key=f"sage_btn_{mentor}",
             use_container_width=True,
-            type="primary" if is_selected else "secondary",
-            disabled=is_selected
+            type="primary" if is_selected else "secondary"
         ):
-            st.session_state.selected_mentor = mentor
-            st.session_state.agent = RAGAgent(persona=mentor)
-            st.session_state.chat_history = []
-            st.rerun()
-        
-        # 显示卡片（紧贴按钮下方）
-        st.markdown(f"""
-        <div style="display: flex; align-items: center; padding: 1rem; margin: -3rem 0 1rem 0;
-                    border-radius: 16px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                    {card_style}
-                    backdrop-filter: blur(8px); pointer-events: none;">
-            {avatar_html}
-            <div style="flex: 1;">
-                <div style="font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500; margin-bottom: 0.25rem; {text_color}">
-                    {mentor}
-                </div>
-                <div style="font-family: 'Inter', sans-serif; font-size: 0.75rem; {text_color} {subtitle_opacity}">
-                    Ancient philosopher
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            if mentor != st.session_state.selected_mentor:
+                st.session_state.selected_mentor = mentor
+                st.session_state.agent = RAGAgent(persona=mentor)
+                st.session_state.chat_history = []
+                st.rerun()
 
 # ===== 初始化 Agent =====
 if "selected_mentor" not in st.session_state:
