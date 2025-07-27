@@ -222,7 +222,7 @@ def load_personas():
 personas = load_personas()
 mentor_names = list(personas.keys())
 
-# ===== 左侧栏选择导师（修复点击功能） =====
+# ===== 左侧栏选择导师 =====
 with st.sidebar:
     st.markdown("""
         <h3 style="font-family: 'Inter', sans-serif; font-size:1.15rem; font-weight:600; 
@@ -315,10 +315,10 @@ if "chat_history" not in st.session_state:
 if "agent" not in st.session_state:
     st.session_state.agent = RAGAgent(persona=st.session_state.selected_mentor)
 
-# ===== 获取导师头像（聊天气泡头像） =====
+# ===== 获取导师头像 =====
 portrait_base64 = get_avatar_base64(st.session_state.selected_mentor)
 
-# ===== 显示当前对话导师提示（细微优化版本） =====
+# ===== 显示当前对话导师提示 =====
 st.markdown(f"""
 <div style="text-align:center; margin:2rem 0 1.5rem;">
     <div style="font-family: 'Noto Serif', serif; font-size:1.1rem; font-weight:400; 
@@ -336,7 +336,7 @@ for msg in st.session_state.chat_history:
     with st.chat_message("assistant", avatar=portrait_base64):
         st.markdown(msg["answer"])
 
-# ===== 输入问题（细微优化） =====
+# ===== 输入问题 =====
 user_question = st.chat_input("Share your thoughts and seek wisdom...")
 if user_question:
     st.session_state.chat_history.append({"question": user_question, "answer": ""})
@@ -351,7 +351,7 @@ if (
     "answer" in st.session_state.chat_history[-1] and
     st.session_state.chat_history[-1]["answer"] == ""
 ):
-    with st.spinner("🤔 The sage is contemplating..."):
+    with st.spinner("The sage is contemplating..."):
         try:
             question = st.session_state.chat_history[-1]["question"]
             answer = st.session_state.agent.ask(question)
@@ -362,7 +362,7 @@ if (
             st.session_state.chat_history[-1]["answer"] = f"The sage is reflecting: {e}"
             st.rerun()
 
-# ===== 页脚（细微优化） =====
+# ===== 页脚 =====
 st.markdown("""
 <div style="text-align:center; margin-top:4rem; padding-top: 2rem;">
     <p class="footer-text" style="font-family: 'Noto Serif', serif; font-weight:300; 
