@@ -38,7 +38,7 @@ def get_user_avatar():
             return "data:image/png;base64," + base64.b64encode(f.read()).decode()
     return None
 
-# ===== 设置背景 =====
+# ===== 设置背景（优化可读性） =====
 def set_background(image_path):
     bg_base64 = image_to_base64(image_path)
     if bg_base64:
@@ -53,7 +53,7 @@ def set_background(image_path):
             }}
             .stApp::before {{
                 content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(255, 255, 255, 0.7); z-index: -1; pointer-events: none;
+                background: rgba(255, 255, 255, 0.85); z-index: -1; pointer-events: none;
             }}
             </style>
             """,
@@ -116,7 +116,7 @@ def set_sidebar_background(image_path):
         </style>
         """, unsafe_allow_html=True)
 
-# ===== 细微优化的字体样式 =====
+# ===== 细微优化的字体样式（增强可读性和聊天区分） =====
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Noto+Serif:wght@300;400;500&display=swap');
@@ -136,7 +136,7 @@ h1 {
     font-weight: 600 !important;
     color: #1a202c !important;
     letter-spacing: -0.015em !important;
-    text-shadow: 0 2px 4px rgba(255,255,255,0.8) !important;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.9) !important;
 }
 
 /* 副标题优化 */
@@ -145,7 +145,7 @@ h1 {
     font-weight: 400 !important;
     color: #4a5568 !important;
     letter-spacing: 0.01em !important;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.7) !important;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8) !important;
 }
 
 /* 侧边栏标题优化 */
@@ -157,20 +157,74 @@ h1 {
     letter-spacing: -0.01em !important;
 }
 
+/* 聊天消息区域优化 - 增强对比度和区分度 */
+.stChatMessage {
+    margin: 1.5rem 0 !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+}
+
+/* 用户消息样式 */
+.stChatMessage[data-testid*="user"] {
+    background: rgba(74, 111, 165, 0.08) !important;
+    border: 1px solid rgba(74, 111, 165, 0.15) !important;
+    margin-left: 2rem !important;
+    box-shadow: 0 2px 8px rgba(74, 111, 165, 0.1) !important;
+}
+
+/* AI消息样式 */
+.stChatMessage[data-testid*="assistant"] {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    margin-right: 2rem !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 消息内容文字优化 */
+.stChatMessage .stMarkdown {
+    color: #2d3748 !important;
+    font-weight: 400 !important;
+    line-height: 1.6 !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* 用户消息文字 */
+.stChatMessage[data-testid*="user"] .stMarkdown {
+    color: #1e40af !important;
+    font-weight: 500 !important;
+}
+
+/* AI消息文字 */
+.stChatMessage[data-testid*="assistant"] .stMarkdown {
+    color: #374151 !important;
+    font-family: 'Noto Serif', serif !important;
+}
+
 /* 聊天输入框优化 */
 .stChatInputContainer {
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
     border-radius: 18px !important;
-    border: 1.5px solid rgba(74, 111, 165, 0.2) !important;
+    border: 2px solid rgba(74, 111, 165, 0.2) !important;
     backdrop-filter: blur(12px) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
     transition: all 0.25s ease !important;
 }
 
 .stChatInputContainer:focus-within {
     border-color: #4a6fa5 !important;
-    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1), 0 6px 16px rgba(0,0,0,0.12) !important;
+    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15), 0 6px 20px rgba(0,0,0,0.15) !important;
     transform: translateY(-1px) !important;
+}
+
+.stChatInput input {
+    color: #2d3748 !important;
+    font-weight: 400 !important;
+    font-size: 1rem !important;
+}
+
+.stChatInput input::placeholder {
+    color: #6b7280 !important;
+    font-style: italic !important;
 }
 
 /* 页脚优化 */
@@ -180,7 +234,13 @@ h1 {
     color: #718096 !important;
     font-size: 0.95rem !important;
     letter-spacing: 0.03em !important;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.6) !important;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8) !important;
+}
+
+/* 头像优化 */
+.stChatMessage img {
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -359,7 +419,7 @@ if (
             st.rerun()
         except Exception as e:
             st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"The sage is reflecting: {e}"
+            st.session_state.chat_history[-1]["answer"] = f"I apologize, but I encountered an error while seeking wisdom: {e}"
             st.rerun()
 
 # ===== 页脚（细微优化） =====
