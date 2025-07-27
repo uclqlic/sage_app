@@ -6,8 +6,8 @@ from rag_agent import RAGAgent
 
 # ===== 页面配置 =====
 st.set_page_config(
-    page_title="Dao AI - Ancient Wisdom for Modern Times",
-    page_icon="🧘",
+    page_title="Dao AI - Answer your question in Chinese Wisdom",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -38,225 +38,64 @@ def get_user_avatar():
             return "data:image/png;base64," + base64.b64encode(f.read()).decode()
     return None
 
-# ===== 现代化样式系统 =====
-def apply_modern_styles():
-    st.markdown("""
-    <style>
-    /* 导入现代字体 */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap');
-    
-    /* 全局样式重置 */
-    .stApp {
-        font-family: 'Inter', 'Noto Sans SC', sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #1a1a1a;
-    }
-    
-    /* 隐藏默认元素 */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stDeployButton {display: none;}
-    
-    /* 侧边栏现代化设计 */
-    .stSidebar {
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(20px) !important;
-        border-right: 1px solid rgba(0, 0, 0, 0.06) !important;
-    }
-    
-    .stSidebar > div:first-child {
-        padding: 1.5rem !important;
-    }
-    
-    /* 贤者选择卡片 */
-    .sage-selector {
-        margin-bottom: 1rem;
-    }
-    
-    .sage-card {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem;
-        margin: 0.5rem 0;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        background: rgba(248, 250, 252, 0.8);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        backdrop-filter: blur(8px);
-    }
-    
-    .sage-card:hover {
-        background: rgba(241, 245, 249, 0.9);
-        border-color: #3b82f6;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-    }
-    
-    .sage-card.active {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        border-color: #1d4ed8;
-        color: white;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-    }
-    
-    .sage-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 0.75rem;
-        object-fit: cover;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-    
-    .sage-card.active .sage-avatar {
-        border-color: rgba(255, 255, 255, 0.6);
-    }
-    
-    .sage-name {
-        font-size: 0.875rem;
-        font-weight: 500;
-        flex: 1;
-    }
-    
-    /* 主内容区域 */
-    .main-content {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        margin: 1rem;
-        padding: 2rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        min-height: calc(100vh - 2rem);
-    }
-    
-    /* 品牌标题 */
-    .brand-header {
-        text-align: center;
-        margin-bottom: 2rem;
-        padding-bottom: 2rem;
-        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-    }
-    
-    .brand-logo {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 1rem;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-    }
-    
-    .brand-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-    }
-    
-    .brand-subtitle {
-        font-size: 1rem;
-        color: #64748b;
-        font-weight: 400;
-    }
-    
-    /* 当前对话状态 */
-    .chat-status {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        border-radius: 50px;
-        margin: 1rem auto 2rem;
-        max-width: 300px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #475569;
-    }
-    
-    .chat-status-icon {
-        margin-right: 0.5rem;
-        font-size: 1rem;
-    }
-    
-    /* 聊天消息样式 */
-    .stChatMessage {
-        background: transparent !important;
-        padding: 1rem 0 !important;
-    }
-    
-    /* 输入框现代化 */
-    .stChatInputContainer {
-        background: rgba(248, 250, 252, 0.8) !important;
-        border-radius: 16px !important;
-        border: 1px solid rgba(226, 232, 240, 0.8) !important;
-        backdrop-filter: blur(8px) !important;
-    }
-    
-    .stChatInputContainer:focus-within {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-    }
-    
-    /* 响应式设计 */
-    @media (max-width: 768px) {
-        .main-content {
-            margin: 0.5rem;
-            padding: 1rem;
-            border-radius: 16px;
-        }
-        
-        .brand-title {
-            font-size: 2rem;
-        }
-        
-        .sage-card {
-            padding: 0.5rem;
-        }
-        
-        .sage-avatar {
-            width: 36px;
-            height: 36px;
-        }
-    }
-    
-    /* 加载动画 */
-    .stSpinner {
-        text-align: center;
-        color: #3b82f6;
-    }
-    
-    /* 自定义滚动条 */
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: rgba(226, 232, 240, 0.3);
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: rgba(148, 163, 184, 0.5);
-        border-radius: 3px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(148, 163, 184, 0.8);
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# ===== 设置背景 =====
+def set_background(image_path):
+    bg_base64 = image_to_base64(image_path)
+    if bg_base64:
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url("data:image/png;base64,{bg_base64}");
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }}
+            .stApp::before {{
+                content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(255, 255, 255, 0.7); z-index: -1; pointer-events: none;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
 
-# ===== 应用样式 =====
-apply_modern_styles()
+def set_sidebar_background(image_path):
+    bg_base64 = image_to_base64(image_path)
+    if bg_base64:
+        st.markdown(f"""
+        <style>
+        [data-testid="stSidebar"] {{
+            background-image: url("data:image/png;base64,{bg_base64}");
+            background-size: cover; background-position: center top; background-repeat: no-repeat;
+            backdrop-filter: blur(8px); border-right: 1px solid rgba(0,0,0,0.1);
+            font-family: 'Inter', sans-serif;
+        }}
+        [data-testid="stSidebar"] > div:first-child {{
+            background: rgba(255,255,255,0.9); padding: 1.5rem; border-radius: 15px;
+            margin: 1.5rem; font-family: 'Inter', sans-serif; font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }}
+        .mentor-card:hover {{
+            transform: scale(1.05);
+            transition: 0.3s ease;
+            cursor: pointer;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
+# ===== 字体样式 =====
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+.stApp { font-family: 'Inter', sans-serif; line-height: 1.6; }
+#MainMenu {visibility: hidden;} footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
+# ===== 背景图 =====
+set_background("水墨背景.png")
+set_sidebar_background("装饰云彩.png")
 
 # ===== 加载人物 personas.json =====
 @st.cache_data(show_spinner=False)
@@ -268,107 +107,81 @@ def load_personas():
 personas = load_personas()
 mentor_names = list(personas.keys())
 
-# ===== 初始化状态 =====
-if "selected_mentor" not in st.session_state:
-    st.session_state.selected_mentor = mentor_names[0]
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-if "agent" not in st.session_state:
-    st.session_state.agent = RAGAgent(persona=st.session_state.selected_mentor)
-
-# ===== 左侧栏 - 现代化贤者选择器 =====
+# ===== 左侧栏选择导师卡片风格 =====
 with st.sidebar:
     st.markdown("""
-    <div style="margin-bottom: 1.5rem;">
-        <h3 style="font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">
-            Choose Your Sage
-        </h3>
-        <p style="font-size: 0.75rem; color: #64748b; margin: 0;">
-            Select a philosopher to guide your journey
-        </p>
-    </div>
+        <h3 style="font-size:1.2rem; font-weight:600; color:#333;">选择一位智慧导师</h3>
     """, unsafe_allow_html=True)
-    
-    # 贤者选择卡片
-    for mentor in mentor_names:
-        mentor_avatar = get_avatar_base64(mentor)
-        is_active = mentor == st.session_state.selected_mentor
-        
-        # 创建卡片HTML
-        card_class = "sage-card active" if is_active else "sage-card"
-        avatar_html = f'<img src="{mentor_avatar}" class="sage-avatar" alt="{mentor}">' if mentor_avatar else f'<div class="sage-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">{mentor[0]}</div>'
-        
-        # 使用按钮进行选择
-        if st.button(
-            mentor,
-            key=f"select_{mentor}",
-            use_container_width=True,
-            type="primary" if is_active else "secondary"
-        ):
-            if mentor != st.session_state.selected_mentor:
-                st.session_state.selected_mentor = mentor
-                st.session_state.agent = RAGAgent(persona=mentor)
+    cols = st.columns(2)
+    for idx, name in enumerate(mentor_names):
+        avatar = get_avatar_base64(name)
+        if avatar:
+            if cols[idx % 2].button(
+                f"\n\n<div class='mentor-card' style='text-align:center;'>"
+                f"<img src='{avatar}' style='width:70px; height:70px; border-radius:50%;'><br><span style='font-size:0.95rem;'>{name}</span>"
+                f"</div>",
+                key=name,
+                use_container_width=True,
+                help=f"与{name}交谈",
+                type="secondary"
+            ):
+                st.session_state.selected_mentor = name
+                st.session_state.agent = RAGAgent(persona=name)
                 st.session_state.chat_history = []
-                st.rerun()
-        
-        # 显示装饰性卡片
-        st.markdown(f"""
-        <div class="{card_class}" style="pointer-events: none; margin-top: -3rem; margin-bottom: 1rem;">
-            {avatar_html}
-            <div class="sage-name">{mentor}</div>
-        </div>
-        """, unsafe_allow_html=True)
 
-# ===== 主内容区域 =====
-with st.container():
-    st.markdown('<div class="main-content">', unsafe_allow_html=True)
-    
-    # 品牌标题
-    st.markdown("""
-    <div class="brand-header">
-        <div class="brand-logo">🧘</div>
-        <h1 class="brand-title">Dao AI</h1>
-        <p class="brand-subtitle">Ancient Wisdom for Modern Times</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # 当前对话状态
-    st.markdown(f"""
-    <div class="chat-status">
-        <span class="chat-status-icon">💬</span>
-        <span>Chatting with {st.session_state.selected_mentor}</span>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # 聊天历史
-    for msg in st.session_state.chat_history:
-        with st.chat_message("user", avatar=get_user_avatar()):
-            st.markdown(msg["question"])
-        with st.chat_message("assistant", avatar=get_avatar_base64(st.session_state.selected_mentor)):
-            st.markdown(msg["answer"])
-    
-    # 输入框
-    user_question = st.chat_input("Ask anything about life, wisdom, or philosophy...")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+# ===== 初始化 Agent =====
+if "selected_mentor" not in st.session_state:
+    st.session_state.selected_mentor = mentor_names[0]
+    st.session_state.agent = RAGAgent(persona=st.session_state.selected_mentor)
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-# ===== 处理用户输入 =====
+# ===== 获取导师头像 =====
+portrait_base64 = get_avatar_base64(st.session_state.selected_mentor)
+
+# ===== 对话顶部提示 =====
+st.markdown(f"""
+<div style="text-align:center; margin-top:2rem; font-size:1.1rem; color:#555;">
+    当前对话：<strong>{st.session_state.selected_mentor}</strong>
+</div>
+""", unsafe_allow_html=True)
+
+# ===== 聊天记录显示 =====
+for msg in st.session_state.chat_history:
+    with st.chat_message("user", avatar=get_user_avatar()):
+        st.markdown(msg["question"])
+    with st.chat_message("assistant", avatar=portrait_base64):
+        st.markdown(msg["answer"])
+
+# ===== 输入问题 =====
+user_question = st.chat_input("问你想问的一切……")
 if user_question:
     st.session_state.chat_history.append({"question": user_question, "answer": ""})
     st.rerun()
 
-# ===== 生成答案 =====
+# ===== 回答生成逻辑 =====
 if (
-    st.session_state.chat_history and
+    "chat_history" in st.session_state and
+    isinstance(st.session_state.chat_history, list) and
+    len(st.session_state.chat_history) > 0 and
+    isinstance(st.session_state.chat_history[-1], dict) and
+    "answer" in st.session_state.chat_history[-1] and
     st.session_state.chat_history[-1]["answer"] == ""
 ):
-    with st.spinner("🤔 The sage is contemplating..."):
+    with st.spinner("导师沉思中……"):
         try:
             question = st.session_state.chat_history[-1]["question"]
             answer = st.session_state.agent.ask(question)
             st.session_state.chat_history[-1]["answer"] = answer
             st.rerun()
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
-            st.session_state.chat_history[-1]["answer"] = f"I apologize, but I encountered an error: {e}"
+            st.error(f"❌ Error in RAGAgent.ask: {str(e)}")
+            st.session_state.chat_history[-1]["answer"] = f"导师沉思中：{e}"
             st.rerun()
+
+# ===== 页脚 =====
+st.markdown("""
+<div style="text-align:center; margin-top:4rem; color:#777;">
+    <p>道可道，非常道 · 名可名，非常名</p>
+</div>
+""", unsafe_allow_html=True)
