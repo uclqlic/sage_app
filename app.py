@@ -249,28 +249,28 @@ h1 {
 set_background("水墨背景.png")
 set_sidebar_background("装饰云彩.png")
 
-# ===== 顶部 LOGO 和 Slogan（布局优化） =====
+# ===== 顶部 LOGO 和 Slogan（舒适布局） =====
 dao_icon_base64 = image_to_base64("道icon.png")
 if dao_icon_base64:
     st.markdown(f"""
-    <div style="text-align:center; margin-bottom:3rem; display: flex; flex-direction: column; align-items: center;">
+    <div style="text-align:center; margin-bottom:4rem; display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
         <img src="data:image/png;base64,{dao_icon_base64}" alt="道"
-             style="width:120px; height:120px; border-radius:50%; 
-                    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12); 
-                    margin-bottom: 1.5rem; transition: transform 0.3s ease;
+             style="width:100px; height:100px; border-radius:50%; 
+                    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1); 
+                    margin-bottom: 2rem; transition: transform 0.3s ease;
                     object-fit: cover; display: block;"
              onmouseover="this.style.transform='scale(1.05)'"
              onmouseout="this.style.transform='scale(1)'">
         <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <h1 style="font-family: 'Playfair Display', serif; font-size:3.2rem; font-weight:600; 
-                       color:#1a202c; margin: 0 0 0.8rem 0; letter-spacing: -0.015em;
+            <h1 style="font-family: 'Playfair Display', serif; font-size:2.8rem; font-weight:600; 
+                       color:#1a202c; margin: 0 0 1.2rem 0; letter-spacing: -0.015em;
                        text-shadow: 0 2px 4px rgba(255,255,255,0.9); line-height: 1.1;">
                 Dao AI
             </h1>
-            <p class="subtitle" style="font-family: 'Noto Serif', serif; font-size:1.25rem; font-weight:400;
+            <p class="subtitle" style="font-family: 'Noto Serif', serif; font-size:1.1rem; font-weight:400;
                                        color:#4a5568; margin: 0; letter-spacing: 0.01em;
-                                       text-shadow: 0 1px 2px rgba(255,255,255,0.8); line-height: 1.4;
-                                       max-width: 400px;">
+                                       text-shadow: 0 1px 2px rgba(255,255,255,0.8); line-height: 1.5;
+                                       max-width: 450px;">
                 Chinese Wisdom · Enrich Your Mind & Soul
             </p>
         </div>
