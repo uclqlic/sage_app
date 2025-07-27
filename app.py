@@ -217,8 +217,8 @@ with st.sidebar:
                 <div style="text-align: center; margin-bottom: 0.5rem;">
                     <img src="{mentor_avatar}" 
                          style="width: 45px; height: 45px; border-radius: 50%; 
-                                object-fit: cover; border: 2px solid {'#3b82f6' if is_selected else '#e5e7eb'};
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                object-fit: cover; border: 2px solid {'#4a6fa5' if is_selected else '#c4c4c4'};
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 </div>
                 """, unsafe_allow_html=True)
             else:
@@ -226,10 +226,10 @@ with st.sidebar:
                 st.markdown(f"""
                 <div style="text-align: center; margin-bottom: 0.5rem;">
                     <div style="width: 45px; height: 45px; border-radius: 50%; 
-                                background: {'#3b82f6' if is_selected else '#6b7280'}; 
+                                background: {'linear-gradient(135deg, #4a6fa5, #2d4a6b)' if is_selected else 'linear-gradient(135deg, #8d9db6, #6b7885)'}; 
                                 display: flex; align-items: center; justify-content: center; 
                                 color: white; font-weight: 600; font-size: 1.1rem;
-                                margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                         {mentor[0]}
                     </div>
                 </div>
