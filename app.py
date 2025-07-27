@@ -276,28 +276,19 @@ if "chat_history" not in st.session_state:
 # ===== 获取导师头像（聊天气泡头像） =====
 portrait_base64 = get_avatar_base64(st.session_state.selected_mentor)
 
-# ===== 显示当前对话导师提示（协调版本） =====
+# ===== 显示当前对话导师提示（极简融入版本） =====
 st.markdown(f"""
-<div style="text-align:center; margin:2rem 0 1rem; padding: 1.8rem 2.5rem; 
-           background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(248,250,252,0.08)); 
-           border: 1px solid rgba(255,255,255,0.18);
-           border-radius: 32px; 
-           backdrop-filter: blur(18px);
-           box-shadow: 0 8px 32px rgba(0,0,0,0.06), 
-                       0 1px 0 rgba(255,255,255,0.25) inset,
-                       0 -1px 0 rgba(0,0,0,0.04) inset; 
-           max-width: 480px; 
-           margin-left: auto; margin-right: auto;
-           position: relative;">
-    <div style="font-family: 'Inter', sans-serif; font-size:1.25rem; font-weight:500; 
-                color:#1a202c; margin-bottom: 0.7rem; letter-spacing: -0.01em;
-                text-shadow: 0 1px 3px rgba(255,255,255,0.9);">
-        Chatting with {st.session_state.selected_mentor}
-    </div>
-    <div style="font-family: 'Noto Serif', serif; font-size:0.95rem; font-weight:400;
-                color:#4a5568; letter-spacing: 0.01em;
+<div style="text-align:center; margin:2rem 0 1rem; padding: 0.8rem 1.5rem; 
+           background: rgba(255,255,255,0.03); 
+           border: none;
+           border-radius: 50px; 
+           backdrop-filter: blur(5px);
+           max-width: 350px; 
+           margin-left: auto; margin-right: auto;">
+    <div style="font-family: 'Inter', sans-serif; font-size:1rem; font-weight:400; 
+                color:#2c3e50; opacity: 0.7; letter-spacing: 0.02em;
                 text-shadow: 0 1px 2px rgba(255,255,255,0.8);">
-        Ask for ancient wisdom and guidance
+        Chatting with {st.session_state.selected_mentor}
     </div>
 </div>
 """, unsafe_allow_html=True)
