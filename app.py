@@ -76,26 +76,6 @@ def set_sidebar_background(image_path):
             margin: 1.5rem; font-family: 'Inter', sans-serif; font-size: 1rem;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }}
-        /* 贤者卡片样式 */
-        .sage-card {{
-            display: flex; align-items: center; padding: 0.8rem; margin: 0.5rem 0;
-            border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
-            background: rgba(255,255,255,0.8); border: 2px solid transparent;
-        }}
-        .sage-card:hover {{
-            background: rgba(255,255,255,0.95); border: 2px solid #4CAF50;
-            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }}
-        .sage-card.selected {{
-            background: rgba(76,175,80,0.1); border: 2px solid #4CAF50;
-        }}
-        .sage-avatar {{
-            width: 70px; height: 70px; border-radius: 50%; margin-right: 1rem;
-            object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }}
-        .sage-name {{
-            font-size: 1.1rem; font-weight: 600; color: #333;
-        }}
         </style>
         """, unsafe_allow_html=True)
 
@@ -134,41 +114,18 @@ def load_personas():
 personas = load_personas()
 mentor_names = list(personas.keys())
 
-# ===== 左侧栏选择导师（卡片式布局） =====
+# ===== 左侧栏选择导师（简洁的下拉菜单） =====
 with st.sidebar:
     st.markdown("""
         <h3 style="font-size:1.2rem; font-weight:600; color:#333;">Choose Your Sage</h3>
     """, unsafe_allow_html=True)
     
-    # 初始化选中的导师
-    if "selected_mentor" not in st.session_state:
-        st.session_state.selected_mentor = mentor_names[0]
-    
-    # 创建卡片式选择器
-    selected_mentor = st.session_state.selected_mentor
-    for mentor in mentor_names:
-        mentor_avatar = get_avatar_base64(mentor)
-        is_selected = mentor == selected_mentor
-        
-        # 创建点击按钮
-        if st.button(
-            f"📜 {mentor}", 
-            key=f"sage_{mentor}",
-            use_container_width=True,
-            type="primary" if is_selected else "secondary"
-        ):
-            selected_mentor = mentor
-            st.session_state.selected_mentor = mentor
-            st.rerun()
-        
-        # 显示头像和名字（装饰性）
-        if mentor_avatar:
-            st.markdown(f"""
-            <div class="sage-card {'selected' if is_selected else ''}">
-                <img src="{mentor_avatar}" class="sage-avatar" alt="{mentor}">
-                <div class="sage-name">{mentor}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    # 使用简洁的下拉选择器
+    selected_mentor = st.selectbox(
+        "Select Sage", 
+        mentor_names, 
+        index=mentor_names.index(st.session_state.selected_mentor) if "selected_mentor" in st.session_state else 0
+    )
 
 # ===== 初始化 Agent =====
 if selected_mentor != st.session_state.get("selected_mentor", ""):
