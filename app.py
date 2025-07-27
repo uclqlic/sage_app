@@ -222,7 +222,7 @@ def load_personas():
 personas = load_personas()
 mentor_names = list(personas.keys())
 
-# ===== 左侧栏选择导师（细微优化版本） =====
+# ===== 左侧栏选择导师（修复点击功能） =====
 with st.sidebar:
     st.markdown("""
         <h3 style="font-family: 'Inter', sans-serif; font-size:1.15rem; font-weight:600; 
@@ -235,29 +235,79 @@ with st.sidebar:
     if "selected_mentor" not in st.session_state:
         st.session_state.selected_mentor = mentor_names[0]
     
-    # 为每个导师创建优化的头像+按钮组合
+    # 为每个导师创建可点击的按钮和装饰卡片
     for mentor in mentor_names:
         is_selected = mentor == st.session_state.selected_mentor
         mentor_avatar = get_avatar_base64(mentor)
         
-        # 创建点击按钮（隐藏）
-        if st.button(f"Select {mentor}", key=f"btn_{mentor}", help=f"Chat with {mentor}"):
-            if mentor != st.session_state.selected_mentor:
-                st.session_state.selected_mentor = mentor
-                st.session_state.agent = RAGAgent(persona=mentor)
-                st.session_state.chat_history = []
-                st.rerun()
+        # 创建两列：头像列和按钮列
+        col1, col2 = st.columns([1, 2.5])
         
-        # 显示优化的卡片
-        if mentor_avatar:
-            st.markdown(f"""
-            <div class="sage-card {'selected' if is_selected else ''}" 
-                 onclick="document.querySelector('[key=\\"btn_{mentor}\\"]').click()"
-                 style="margin-top: -3rem; margin-bottom: 1rem;">
-                <img src="{mentor_avatar}" class="sage-avatar" alt="{mentor}">
-                <div class="sage-name">{mentor}</div>
-            </div>
-            """, unsafe_allow_html=True)
+        with col1:
+            # 显示头像
+            if mentor_avatar:
+                st.markdown(f"""
+                <div style="text-align: center; margin-bottom: 0.5rem; margin-top: 0.3rem;">
+                    <img src="{mentor_avatar}" 
+                         style="width: 50px; height: 50px; border-radius: 50%; 
+                                object-fit: cover; border: 2.5px solid {'#4a6fa5' if is_selected else 'rgba(255,255,255,0.8)'};
+                                box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+                                transition: all 0.25s ease;">
+                </div>
+                """, unsafe_allow_html=True)
+        
+        with col2:
+            # 创建可点击的按钮
+            if st.button(
+                mentor,
+                key=f"sage_btn_{mentor}",
+                use_container_width=True,
+                type="primary" if is_selected else "secondary"
+            ):
+                if mentor != st.session_state.selected_mentor:
+                    st.session_state.selected_mentor = mentor
+                    st.session_state.agent = RAGAgent(persona=mentor)
+                    st.session_state.chat_history = []
+                    st.rerun()
+        
+        # 添加分隔线
+        if mentor != mentor_names[-1]:
+            st.markdown("<div style='margin: 0.8rem 0; height: 1px; background: rgba(0,0,0,0.06);'></div>", unsafe_allow_html=True)
+    
+    # 添加自定义CSS来美化按钮
+    st.markdown("""
+    <style>
+    div[data-testid="stSidebar"] button[kind="primary"] {
+        background: linear-gradient(135deg, #4a6fa5, #2d4a6b) !important;
+        border: 1px solid #2d4a6b !important;
+        color: white !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        transition: all 0.25s ease !important;
+    }
+    
+    div[data-testid="stSidebar"] button[kind="primary"]:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(74, 111, 165, 0.3) !important;
+    }
+    
+    div[data-testid="stSidebar"] button[kind="secondary"] {
+        background: rgba(255,255,255,0.8) !important;
+        border: 1px solid rgba(226, 232, 240, 0.6) !important;
+        color: #2d3748 !important;
+        border-radius: 12px !important;
+        font-weight: 500 !important;
+        transition: all 0.25s ease !important;
+    }
+    
+    div[data-testid="stSidebar"] button[kind="secondary"]:hover {
+        background: rgba(255,255,255,0.95) !important;
+        border-color: #4a6fa5 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(74, 111, 165, 0.15) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # ===== 初始化 Agent =====
 if "chat_history" not in st.session_state:
